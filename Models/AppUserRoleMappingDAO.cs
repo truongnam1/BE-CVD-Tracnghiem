@@ -8,6 +8,7 @@ namespace Tracnghiem.Models
         public long AppUserId { get; set; }
         public long RoleId { get; set; }
 
-        public virtual Role1DAO Role { get; set; }
+        public virtual AppUserDAO AppUser { get; set; }
+        public virtual RoleDAO Role { get; set; }
     }
 }

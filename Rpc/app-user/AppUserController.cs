@@ -160,149 +160,6 @@ namespace Tracnghiem.Rpc.app_user
                 return BadRequest(AppUsers.Where(x => !x.IsValidated));
             return true;
         }
-        
-        [Route(AppUserRoute.Import), HttpPost]
-        public async Task<ActionResult> Import(IFormFile file)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            ImageFilter ImageFilter = new ImageFilter
-            {
-                Skip = 0,
-                Take = int.MaxValue,
-                Selects = ImageSelect.ALL
-            };
-            List<Image> Images = await ImageService.List(ImageFilter);
-            RoleFilter RoleFilter = new RoleFilter
-            {
-                Skip = 0,
-                Take = int.MaxValue,
-                Selects = RoleSelect.ALL
-            };
-            List<Role> Roles = await RoleService.List(RoleFilter);
-            List<AppUser> AppUsers = new List<AppUser>();
-            using (ExcelPackage excelPackage = new ExcelPackage(file.OpenReadStream()))
-            {
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                if (worksheet == null)
-                    return Ok(AppUsers);
-                int StartColumn = 1;
-                int StartRow = 2;
-                int IdColumn = 0 + StartColumn;
-                int UsernameColumn = 1 + StartColumn;
-                int DisplayNameColumn = 2 + StartColumn;
-                int PasswordColumn = 3 + StartColumn;
-                int RefreshTokenColumn = 4 + StartColumn;
-                int RoleIdColumn = 5 + StartColumn;
-                int ImageIdColumn = 6 + StartColumn;
-
-                for (int i = StartRow; i <= worksheet.Dimension.End.Row; i++)
-                {
-                    if (string.IsNullOrEmpty(worksheet.Cells[i, StartColumn].Value?.ToString()))
-                        break;
-                    string IdValue = worksheet.Cells[i, IdColumn].Value?.ToString();
-                    string UsernameValue = worksheet.Cells[i, UsernameColumn].Value?.ToString();
-                    string DisplayNameValue = worksheet.Cells[i, DisplayNameColumn].Value?.ToString();
-                    string PasswordValue = worksheet.Cells[i, PasswordColumn].Value?.ToString();
-                    string RefreshTokenValue = worksheet.Cells[i, RefreshTokenColumn].Value?.ToString();
-                    string RoleIdValue = worksheet.Cells[i, RoleIdColumn].Value?.ToString();
-                    string ImageIdValue = worksheet.Cells[i, ImageIdColumn].Value?.ToString();
-                    
-                    AppUser AppUser = new AppUser();
-                    AppUser.Username = UsernameValue;
-                    AppUser.DisplayName = DisplayNameValue;
-                    AppUser.Password = PasswordValue;
-                    AppUser.RefreshToken = RefreshTokenValue;
-                    Image Image = Images.Where(x => x.Id.ToString() == ImageIdValue).FirstOrDefault();
-                    AppUser.ImageId = Image == null ? 0 : Image.Id;
-                    AppUser.Image = Image;
-                    Role Role = Roles.Where(x => x.Id.ToString() == RoleIdValue).FirstOrDefault();
-                    AppUser.RoleId = Role == null ? 0 : Role.Id;
-                    AppUser.Role = Role;
-                    
-                    AppUsers.Add(AppUser);
-                }
-            }
-            AppUsers = await AppUserService.BulkMerge(AppUsers);
-            if (AppUsers.All(x => x.IsValidated))
-                return Ok(true);
-            else
-            {
-                List<string> Errors = new List<string>();
-                for (int i = 0; i < AppUsers.Count; i++)
-                {
-                    AppUser AppUser = AppUsers[i];
-                    if (!AppUser.IsValidated)
-                    {
-                        string Error = $"Dòng {i + 2} có lỗi:";
-                        if (AppUser.Errors.ContainsKey(nameof(AppUser.Id).Camelize()))
-                            Error += AppUser.Errors[nameof(AppUser.Id).Camelize()];
-                        if (AppUser.Errors.ContainsKey(nameof(AppUser.Username).Camelize()))
-                            Error += AppUser.Errors[nameof(AppUser.Username).Camelize()];
-                        if (AppUser.Errors.ContainsKey(nameof(AppUser.DisplayName).Camelize()))
-                            Error += AppUser.Errors[nameof(AppUser.DisplayName).Camelize()];
-                        if (AppUser.Errors.ContainsKey(nameof(AppUser.Password).Camelize()))
-                            Error += AppUser.Errors[nameof(AppUser.Password).Camelize()];
-                        if (AppUser.Errors.ContainsKey(nameof(AppUser.RefreshToken).Camelize()))
-                            Error += AppUser.Errors[nameof(AppUser.RefreshToken).Camelize()];
-                        if (AppUser.Errors.ContainsKey(nameof(AppUser.RoleId).Camelize()))
-                            Error += AppUser.Errors[nameof(AppUser.RoleId).Camelize()];
-                        if (AppUser.Errors.ContainsKey(nameof(AppUser.ImageId).Camelize()))
-                            Error += AppUser.Errors[nameof(AppUser.ImageId).Camelize()];
-                        Errors.Add(Error);
-                    }
-                }
-                return BadRequest(Errors);
-            }
-        }
-        
-        [Route(AppUserRoute.Export), HttpPost]
-        public async Task<ActionResult> Export([FromBody] AppUser_AppUserFilterDTO AppUser_AppUserFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            var AppUserFilter = ConvertFilterDTOToFilterEntity(AppUser_AppUserFilterDTO);
-            AppUserFilter.Skip = 0;
-            AppUserFilter.Take = int.MaxValue;
-            AppUserFilter = await AppUserService.ToFilter(AppUserFilter);
-            List<AppUser> AppUsers = await AppUserService.List(AppUserFilter);
-            List<AppUser_AppUserExportDTO> AppUser_AppUserExportDTOs = AppUsers.Select(x => new AppUser_AppUserExportDTO(x)).ToList();  
-            var STT = 1;
-            foreach (var AppUser_AppUserExportDTO in AppUser_AppUserExportDTOs)
-            {
-                AppUser_AppUserExportDTO.STT = STT++;
-            }
-            string path = "Templates/AppUser_Export.xlsx";
-            byte[] arr = System.IO.File.ReadAllBytes(path);
-            MemoryStream input = new MemoryStream(arr);
-            MemoryStream output = new MemoryStream();
-            dynamic Data = new ExpandoObject();            
-            Data.Data = AppUser_AppUserExportDTOs;
-            using (var document = StaticParams.DocumentFactory.Open(input, output, "xlsx"))
-            {    
-                document.Process(Data);
-            }
-            return File(output.ToArray(), "application/octet-stream", "AppUser.xlsx");
-        }
-
-        [Route(AppUserRoute.ExportTemplate), HttpPost]
-        public async Task<ActionResult> ExportTemplate([FromBody] AppUser_AppUserFilterDTO AppUser_AppUserFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            string path = "Templates/AppUser_Template.xlsx";
-            byte[] arr = System.IO.File.ReadAllBytes(path);
-            MemoryStream input = new MemoryStream(arr);
-            MemoryStream output = new MemoryStream();
-            dynamic Data = new ExpandoObject();
-            using (var document = StaticParams.DocumentFactory.Open(input, output, "xlsx"))
-            {
-                document.Process(Data);
-            };
-            return File(output.ToArray(), "application/octet-stream", "AppUser.xlsx");
-        }
 
         private async Task<bool> HasPermission(long Id)
         {
@@ -332,19 +189,12 @@ namespace Tracnghiem.Rpc.app_user
             AppUser.Email = AppUser_AppUserDTO.Email;
             AppUser.Password = AppUser_AppUserDTO.Password;
             AppUser.RefreshToken = AppUser_AppUserDTO.RefreshToken;
-            AppUser.RoleId = AppUser_AppUserDTO.RoleId;
             AppUser.ImageId = AppUser_AppUserDTO.ImageId;
             AppUser.Image = AppUser_AppUserDTO.Image == null ? null : new Image
             {
                 Id = AppUser_AppUserDTO.Image.Id,
                 Name = AppUser_AppUserDTO.Image.Name,
                 Url = AppUser_AppUserDTO.Image.Url,
-            };
-            AppUser.Role = AppUser_AppUserDTO.Role == null ? null : new Role
-            {
-                Id = AppUser_AppUserDTO.Role.Id,
-                Code = AppUser_AppUserDTO.Role.Code,
-                Name = AppUser_AppUserDTO.Role.Name,
             };
             AppUser.ExamHistories = AppUser_AppUserDTO.ExamHistories?
                 .Select(x => new ExamHistory
@@ -392,7 +242,6 @@ namespace Tracnghiem.Rpc.app_user
             AppUserFilter.DisplayName = AppUser_AppUserFilterDTO.DisplayName;
             AppUserFilter.Password = AppUser_AppUserFilterDTO.Password;
             AppUserFilter.RefreshToken = AppUser_AppUserFilterDTO.RefreshToken;
-            AppUserFilter.RoleId = AppUser_AppUserFilterDTO.RoleId;
             AppUserFilter.ImageId = AppUser_AppUserFilterDTO.ImageId;
             return AppUserFilter;
         }

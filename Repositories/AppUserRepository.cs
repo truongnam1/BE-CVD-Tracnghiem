@@ -45,7 +45,6 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.Password, filter.Password);
             query = query.Where(q => q.RefreshToken, filter.RefreshToken);
             query = query.Where(q => q.ImageId, filter.ImageId);
-            query = query.Where(q => q.RoleId, filter.RoleId);
 
             return query;
         }
@@ -64,7 +63,6 @@ namespace Tracnghiem.Repositories
                 queryable = queryable.Where(q => q.Password, AppUserFilter.Password);
                 queryable = queryable.Where(q => q.RefreshToken, AppUserFilter.RefreshToken);
                 queryable = queryable.Where(q => q.ImageId, AppUserFilter.ImageId);
-                queryable = queryable.Where(q => q.RoleId, AppUserFilter.RoleId);
                 initQuery = initQuery.Union(queryable);
             }
             return initQuery;
@@ -92,9 +90,6 @@ namespace Tracnghiem.Repositories
                         case AppUserOrder.RefreshToken:
                             query = query.OrderBy(q => q.RefreshToken);
                             break;
-                        case AppUserOrder.Role:
-                            query = query.OrderBy(q => q.RoleId);
-                            break;
                         case AppUserOrder.Image:
                             query = query.OrderBy(q => q.ImageId);
                             break;
@@ -118,9 +113,6 @@ namespace Tracnghiem.Repositories
                         case AppUserOrder.RefreshToken:
                             query = query.OrderByDescending(q => q.RefreshToken);
                             break;
-                        case AppUserOrder.Role:
-                            query = query.OrderByDescending(q => q.RoleId);
-                            break;
                         case AppUserOrder.Image:
                             query = query.OrderByDescending(q => q.ImageId);
                             break;
@@ -140,19 +132,12 @@ namespace Tracnghiem.Repositories
                 DisplayName = filter.Selects.Contains(AppUserSelect.DisplayName) ? q.DisplayName : default(string),
                 Password = filter.Selects.Contains(AppUserSelect.Password) ? q.Password : default(string),
                 RefreshToken = filter.Selects.Contains(AppUserSelect.RefreshToken) ? q.RefreshToken : default(string),
-                RoleId = filter.Selects.Contains(AppUserSelect.Role) ? q.RoleId : default(long?),
                 ImageId = filter.Selects.Contains(AppUserSelect.Image) ? q.ImageId : default(long?),
                 Image = filter.Selects.Contains(AppUserSelect.Image) && q.Image != null ? new Image
                 {
                     Id = q.Image.Id,
                     Name = q.Image.Name,
                     Url = q.Image.Url,
-                } : null,
-                Role = filter.Selects.Contains(AppUserSelect.Role) && q.Role != null ? new Role
-                {
-                    Id = q.Role.Id,
-                    Code = q.Role.Code,
-                    Name = q.Role.Name,
                 } : null,
             }).ToListAsync();
             return AppUsers;
@@ -198,20 +183,13 @@ namespace Tracnghiem.Repositories
                 DisplayName = x.DisplayName,
                 Password = x.Password,
                 RefreshToken = x.RefreshToken,
-                RoleId = x.RoleId,
                 ImageId = x.ImageId,
                 Image = x.Image == null ? null : new Image
                 {
                     Id = x.Image.Id,
                     Name = x.Image.Name,
                     Url = x.Image.Url,
-                },
-                Role = x.Role == null ? null : new Role
-                {
-                    Id = x.Role.Id,
-                    Code = x.Role.Code,
-                    Name = x.Role.Name,
-                },
+                }
             }).ToListAsync();
             
             var ExamHistoryQuery = DataContext.ExamHistory.AsNoTracking()
@@ -267,20 +245,13 @@ namespace Tracnghiem.Repositories
                 DisplayName = x.DisplayName,
                 Password = x.Password,
                 RefreshToken = x.RefreshToken,
-                RoleId = x.RoleId,
                 ImageId = x.ImageId,
                 Image = x.Image == null ? null : new Image
                 {
                     Id = x.Image.Id,
                     Name = x.Image.Name,
                     Url = x.Image.Url,
-                },
-                Role = x.Role == null ? null : new Role
-                {
-                    Id = x.Role.Id,
-                    Code = x.Role.Code,
-                    Name = x.Role.Name,
-                },
+                }
             }).FirstOrDefaultAsync();
 
             if (AppUser == null)
@@ -326,7 +297,6 @@ namespace Tracnghiem.Repositories
             AppUserDAO.Email = AppUser.Email;
             AppUserDAO.Password = AppUser.Password;
             AppUserDAO.RefreshToken = AppUser.RefreshToken;
-            AppUserDAO.RoleId = AppUser.RoleId;
             AppUserDAO.ImageId = AppUser.ImageId;
             DataContext.AppUser.Add(AppUserDAO);
             await DataContext.SaveChangesAsync();
@@ -347,7 +317,6 @@ namespace Tracnghiem.Repositories
             AppUserDAO.DisplayName = AppUser.DisplayName;
             AppUserDAO.Password = AppUser.Password;
             AppUserDAO.RefreshToken = AppUser.RefreshToken;
-            AppUserDAO.RoleId = AppUser.RoleId;
             AppUserDAO.ImageId = AppUser.ImageId;
             await DataContext.SaveChangesAsync();
             await SaveReference(AppUser);
@@ -388,7 +357,6 @@ namespace Tracnghiem.Repositories
                 AppUserDAO.DisplayName = AppUser.DisplayName;
                 AppUserDAO.Password = AppUser.Password;
                 AppUserDAO.RefreshToken = AppUser.RefreshToken;
-                AppUserDAO.RoleId = AppUser.RoleId;
                 AppUserDAO.ImageId = AppUser.ImageId;
             }
             await DataContext.AppUser.BulkInsertAsync(Inserts);

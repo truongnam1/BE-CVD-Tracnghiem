@@ -18,6 +18,7 @@ namespace Tracnghiem.Models
         public string Name { get; set; }
         public bool IsDeleted { get; set; }
 
+        public virtual SiteDAO Site { get; set; }
         public virtual ICollection<ActionDAO> Actions { get; set; }
         public virtual ICollection<FieldDAO> Fields { get; set; }
         public virtual ICollection<PermissionDAO> Permissions { get; set; }

@@ -44,25 +44,7 @@ namespace Tracnghiem.Rpc.app_user
                 .Select(x => new AppUser_ImageDTO(x)).ToList();
             return AppUser_ImageDTOs;
         }
-        [Route(AppUserRoute.SingleListRole), HttpPost]
-        public async Task<List<AppUser_RoleDTO>> SingleListRole([FromBody] AppUser_RoleFilterDTO AppUser_RoleFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
 
-            RoleFilter RoleFilter = new RoleFilter();
-            RoleFilter.Skip = 0;
-            RoleFilter.Take = int.MaxValue;
-            RoleFilter.Take = 20;
-            RoleFilter.OrderBy = RoleOrder.Id;
-            RoleFilter.OrderType = OrderType.ASC;
-            RoleFilter.Selects = RoleSelect.ALL;
-
-            List<Role> Roles = await RoleService.List(RoleFilter);
-            List<AppUser_RoleDTO> AppUser_RoleDTOs = Roles
-                .Select(x => new AppUser_RoleDTO(x)).ToList();
-            return AppUser_RoleDTOs;
-        }
         [Route(AppUserRoute.SingleListExamHistory), HttpPost]
         public async Task<List<AppUser_ExamHistoryDTO>> SingleListExamHistory([FromBody] AppUser_ExamHistoryFilterDTO AppUser_ExamHistoryFilterDTO)
         {

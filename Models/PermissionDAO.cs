@@ -19,7 +19,7 @@ namespace Tracnghiem.Models
         public long StatusId { get; set; }
 
         public virtual MenuDAO Menu { get; set; }
-        public virtual Role1DAO Role { get; set; }
+        public virtual RoleDAO Role { get; set; }
         public virtual ICollection<PermissionActionMappingDAO> PermissionActionMappings { get; set; }
         public virtual ICollection<PermissionContentDAO> PermissionContents { get; set; }
     }

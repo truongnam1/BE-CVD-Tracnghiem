@@ -158,7 +158,6 @@ namespace Tracnghiem.Repositories
                     DisplayName = q.AppUser.DisplayName,
                     Password = q.AppUser.Password,
                     RefreshToken = q.AppUser.RefreshToken,
-                    RoleId = q.AppUser.RoleId,
                     ImageId = q.AppUser.ImageId,
                 } : null,
                 Exam = filter.Selects.Contains(ExamHistorySelect.Exam) && q.Exam != null ? new Exam
@@ -231,7 +230,6 @@ namespace Tracnghiem.Repositories
                     DisplayName = x.AppUser.DisplayName,
                     Password = x.AppUser.Password,
                     RefreshToken = x.AppUser.RefreshToken,
-                    RoleId = x.AppUser.RoleId,
                     ImageId = x.AppUser.ImageId,
                 },
                 Exam = x.Exam == null ? null : new Exam
@@ -277,7 +275,6 @@ namespace Tracnghiem.Repositories
                     DisplayName = x.AppUser.DisplayName,
                     Password = x.AppUser.Password,
                     RefreshToken = x.AppUser.RefreshToken,
-                    RoleId = x.AppUser.RoleId,
                     ImageId = x.AppUser.ImageId,
                 },
                 Exam = x.Exam == null ? null : new Exam
