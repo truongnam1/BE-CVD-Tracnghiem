@@ -15,11 +15,9 @@ namespace Tracnghiem.Rpc.app_user
         public string Email { get; set; }
         public string Password { get; set; }
         public string RefreshToken { get; set; }
-        public long? RoleId { get; set; }
         public long? ImageId { get; set; }
         public string Token { get; set; }
         public AppUser_ImageDTO Image { get; set; }
-        public AppUser_RoleDTO Role { get; set; }
         public List<AppUser_ExamHistoryDTO> ExamHistories { get; set; }
         public AppUser_AppUserDTO() {}
         public AppUser_AppUserDTO(AppUser AppUser)
@@ -30,11 +28,9 @@ namespace Tracnghiem.Rpc.app_user
             this.Email = AppUser.Email;
             this.Password = AppUser.Password;
             this.RefreshToken = AppUser.RefreshToken;
-            this.RoleId = AppUser.RoleId;
             this.ImageId = AppUser.ImageId;
             this.Token = AppUser.Token;
             this.Image = AppUser.Image == null ? null : new AppUser_ImageDTO(AppUser.Image);
-            this.Role = AppUser.Role == null ? null : new AppUser_RoleDTO(AppUser.Role);
             this.ExamHistories = AppUser.ExamHistories?.Select(x => new AppUser_ExamHistoryDTO(x)).ToList();
             this.Informations = AppUser.Informations;
             this.Warnings = AppUser.Warnings;
@@ -49,7 +45,6 @@ namespace Tracnghiem.Rpc.app_user
         public StringFilter DisplayName { get; set; }
         public StringFilter Password { get; set; }
         public StringFilter RefreshToken { get; set; }
-        public IdFilter RoleId { get; set; }
         public IdFilter ImageId { get; set; }
         public AppUserOrder OrderBy { get; set; }
     }

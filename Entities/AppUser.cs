@@ -5,6 +5,7 @@ using Tracnghiem.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Tracnghiem.Helpers;
+using TrueSight.PER.Entities;
 
 namespace Tracnghiem.Entities
 {

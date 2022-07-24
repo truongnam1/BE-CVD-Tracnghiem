@@ -18,6 +18,9 @@ using Action = TrueSight.PER.Entities.Action;
 using Role = TrueSight.PER.Entities.Role;
 using Microsoft.Extensions.Configuration;
 using Tracnghiem.Repositories;
+using System.Security.Cryptography;
+using Tracnghiem.Services.MSite;
+using Tracnghiem.Services.MRole;
 
 namespace Tracnghiem.Rpc
 {
@@ -27,24 +30,60 @@ namespace Tracnghiem.Rpc
         private DataContext DataContext;
         private IConfiguration Configuration;
         private IRedisStore RedisStore;
+        private ISiteService SiteService;
+        private IRoleService RoleService;
+
+        private string AdminPassword;
+
         private IUOW UOW;
         public SetupController(
             DataContext DataContext,
             IConfiguration Configuration,
             IRedisStore RedisStore,
-            //IRabbitManager RabbitManager,
+            ISiteService SiteService,
+            IRoleService RoleService,
+
             IUOW UOW
             )
         {
             this.DataContext = DataContext;
-            //this.RabbitManager = RabbitManager;
+            AdminPassword = Configuration["Config:AdminPassword"];
             this.UOW = UOW;
             this.RedisStore = RedisStore;
+            this.SiteService = SiteService;
+            this.RoleService = RoleService;
         }
         [HttpGet, Route("rpc/tracnghiem/setup/init")]
         public async Task<ActionResult> Init()
         {
+            await InitEnums();
             await SendMenu();
+            InitAdmin();
+            return Ok();
+        }
+
+        private ActionResult InitAdmin()
+        {
+            AppUserDAO AppUser = DataContext.AppUser
+                .Where(au => au.Username.ToLower() == "Administrator".ToLower())
+                .FirstOrDefault();
+            if (AppUser == null)
+            {    
+                AppUser = new AppUserDAO()
+                {
+                    Username = "Administrator",
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    DeletedAt = null,
+                    DisplayName = "Administrator",
+                    Email = "namtao100@gmail.com",
+                    Password = HashPassword(AdminPassword),
+                    StatusId = 1,
+                };
+                DataContext.AppUser.Add(AppUser);
+                DataContext.SaveChanges();
+            }
+
             return Ok();
         }
 
@@ -55,10 +94,12 @@ namespace Tracnghiem.Rpc
             InitExamLevelEnum();
             InitExamStatusEnum();
             InitGradeEnum();
-            //InitQuestionGroupEnum();
-            //InitQuestionTypeEnum();
-            //InitRoleEnum();
-            //InitSubjectEnum();
+            InitQuestionGroupEnum();
+            InitQuestionTypeEnum();
+            InitSubjectEnum();
+            InitSiteEnum();
+            InitPermissionEnum();
+            DataContext.SaveChanges();
             return Ok();
         }
         private void InitStatusEnum()
@@ -121,16 +162,6 @@ namespace Tracnghiem.Rpc
             }).ToList();
             DataContext.QuestionType.BulkSynchronize(QuestionTypeList);
         }
-        private void InitRoleEnum()
-        {
-            List<RoleDAO> RoleList = RoleEnum.RoleEnumList.Select(item => new RoleDAO
-            {
-                Id = item.Id,
-                Code = item.Code,
-                Name = item.Name,
-            }).ToList();
-            DataContext.Role.BulkSynchronize(RoleList);
-        }
         private void InitSubjectEnum()
         {
             List<SubjectDAO> SubjectList = SubjectEnum.SubjectEnumList.Select(item => new SubjectDAO
@@ -141,110 +172,191 @@ namespace Tracnghiem.Rpc
             }).ToList();
             DataContext.Subject.BulkSynchronize(SubjectList);
         }
+        private void InitSiteEnum()
+        {
+            List<SiteDAO> SiteList = SiteEnum.SiteEnumList.Select(item => new SiteDAO
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+                IsDisplay = false
+            }).ToList();
+            DataContext.Site.BulkSynchronize(SiteList);
+        }
+        private void InitPermissionEnum()
+        {
+            List<FieldTypeDAO> FieldTypeDAOs = FieldTypeEnum.List.Select(item => new FieldTypeDAO
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+            }).ToList();
+            DataContext.FieldType.BulkSynchronize(FieldTypeDAOs);
+            List<PermissionOperatorDAO> PermissionOperatorDAOs = new List<PermissionOperatorDAO>();
+            List<PermissionOperatorDAO> ID = PermissionOperatorEnum.PermissionOperatorEnumForID.Select(item => new PermissionOperatorDAO
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+                FieldTypeId = FieldTypeEnum.ID.Id,
+            }).ToList();
+            PermissionOperatorDAOs.AddRange(ID);
+            List<PermissionOperatorDAO> STRING = PermissionOperatorEnum.PermissionOperatorEnumForSTRING.Select(item => new PermissionOperatorDAO
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+                FieldTypeId = FieldTypeEnum.STRING.Id,
+            }).ToList();
+            PermissionOperatorDAOs.AddRange(STRING);
+
+            List<PermissionOperatorDAO> LONG = PermissionOperatorEnum.PermissionOperatorEnumForLONG.Select(item => new PermissionOperatorDAO
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+                FieldTypeId = FieldTypeEnum.LONG.Id,
+            }).ToList();
+            PermissionOperatorDAOs.AddRange(LONG);
+
+            List<PermissionOperatorDAO> DECIMAL = PermissionOperatorEnum.PermissionOperatorEnumForDECIMAL.Select(item => new PermissionOperatorDAO
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+                FieldTypeId = FieldTypeEnum.DECIMAL.Id,
+            }).ToList();
+            PermissionOperatorDAOs.AddRange(DECIMAL);
+
+            List<PermissionOperatorDAO> DATE = PermissionOperatorEnum.PermissionOperatorEnumForDATE.Select(item => new PermissionOperatorDAO
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+                FieldTypeId = FieldTypeEnum.DATE.Id,
+            }).ToList();
+            PermissionOperatorDAOs.AddRange(DATE);
+
+            DataContext.PermissionOperator.BulkSynchronize(PermissionOperatorDAOs);
+        }
+
+        private string HashPassword(string password)
+        {
+            byte[] salt;
+            new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
+            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000);
+            byte[] hash = pbkdf2.GetBytes(20);
+            byte[] hashBytes = new byte[36];
+            Array.Copy(salt, 0, hashBytes, 0, 16);
+            Array.Copy(hash, 0, hashBytes, 16, 20);
+            string savedPasswordHash = Convert.ToBase64String(hashBytes);
+            return savedPasswordHash;
+        }
 
 
         [HttpGet(), Route("rpc/tracnghiem/setup/send-permission")]
         public async Task<ActionResult> SendRole()
         {
-            //Site Site = await BuildRole();
-            //RabbitManager.PublishSingle(Site, RoutingKeyEnum.RoleSend.Code);
+            Site Site = await BuildRole();
+            await RoleService.BulkMerge(Site);
+
             return Ok();
         }
 
-        //private async Task<Site> BuildRole()
-        //{
-        //    Site Site = new Site       
-        //    {
-        //        Code = "/tracnghiem/",
-        //        Name = "Tracnghiem",
-        //        IsDisplay = true
-        //    };
+        private async Task<Site> BuildRole()
+        {
+            Site Site = new Site
+            {
+                Code = "/tracnghiem/",
+                Name = "Tracnghiem",
+                IsDisplay = true
+            };
 
-        //    var RoleDAOs = DataContext.Role.AsNoTracking();
-        //    var PermissionDAOs = DataContext.Permission.AsNoTracking();
-        //    var AppUserRoleMappingDAOs = DataContext.AppUserRoleMapping.AsNoTracking();
-        //    var PermissionActionMappingDAOs = DataContext.PermissionActionMapping.AsNoTracking();
-        //    var PermissionContentDAOs = DataContext.PermissionContent.AsNoTracking();
+            var RoleDAOs = DataContext.Role.AsNoTracking();
+            var PermissionDAOs = DataContext.Permission.AsNoTracking();
+            var AppUserRoleMappingDAOs = DataContext.AppUserRoleMapping.AsNoTracking();
+            var PermissionActionMappingDAOs = DataContext.PermissionActionMapping.AsNoTracking();
+            var PermissionContentDAOs = DataContext.PermissionContent.AsNoTracking();
 
-        //    List<Role> Roles = new List<Role> ();
+            List<Role> Roles = new List<Role>();
 
-        //    //Build Role
-        //    foreach (var RoleDAO in RoleDAOs)
-        //    {
-        //        Role Role = new Role()
-        //        {
-        //            Id = RoleDAO.Id,
-        //            Code = RoleDAO.Code,
-        //            Name = RoleDAO.Name,
-        //            StatusId = RoleDAO.StatusId,
-        //            Used = RoleDAO.Used
-        //        };
+            //Build Role
+            foreach (var RoleDAO in RoleDAOs)
+            {
+                Role Role = new Role()
+                {
+                    Id = RoleDAO.Id,
+                    Code = RoleDAO.Code,
+                    Name = RoleDAO.Name,
+                    StatusId = RoleDAO.StatusId,
+                    Used = RoleDAO.Used
+                };
 
-        //        //Build AppUserRoleMapping
-        //        List<long> AppUserIds = AppUserRoleMappingDAOs
-        //            .Where(x => x.RoleId == RoleDAO.Id)
-        //            .Select(x => x.AppUserId).Distinct().ToList();
-        //        List<AppUserRoleMapping> AppUserRoleMappings = AppUserIds
-        //            .Select(ar => new AppUserRoleMapping
-        //            {
-        //                RoleId = RoleDAO.Id,
-        //                AppUserId = ar,
-        //            }).ToList();
+                //Build AppUserRoleMapping
+                List<long> AppUserIds = AppUserRoleMappingDAOs
+                    .Where(x => x.RoleId == RoleDAO.Id)
+                    .Select(x => x.AppUserId).Distinct().ToList();
+                List<AppUserRoleMapping> AppUserRoleMappings = AppUserIds
+                    .Select(ar => new AppUserRoleMapping
+                    {
+                        RoleId = RoleDAO.Id,
+                        AppUserId = ar,
+                    }).ToList();
 
 
-        //        //Build Permission
-        //        List<Permission> Permissions = PermissionDAOs.Where(x => x.RoleId == RoleDAO.Id)
-        //            .Select(p => new Permission()
-        //            {
-        //                Id = p.Id,
-        //                Code = p.Code,
-        //                Name = p.Name,
-        //                StatusId = p.StatusId,
+                //Build Permission
+                List<Permission> Permissions = PermissionDAOs.Where(x => x.RoleId == RoleDAO.Id)
+                    .Select(p => new Permission()
+                    {
+                        Id = p.Id,
+                        Code = p.Code,
+                        Name = p.Name,
+                        StatusId = p.StatusId,
 
-        //                //Get MenuId
-        //                MenuId = p.MenuId,
-        //                Menu = new Menu()
-        //                {
-        //                Id = p.Menu.Id,
-        //                Code = p.Menu.Code,
-        //                Name = p.Menu.Name,
-        //            },
+                        //Get MenuId
+                        MenuId = p.MenuId,
+                        Menu = new Menu()
+                        {
+                            Id = p.Menu.Id,
+                            Code = p.Menu.Code,
+                            Name = p.Menu.Name,
+                        },
 
-        //            //Build PermissionActionMapping
-        //            PermissionActionMappings = PermissionActionMappingDAOs.Where(pa => pa.PermissionId == p.Id)
-        //                .Select(pam => new PermissionActionMapping()
-        //                {
-        //                    PermissionId = p.Id,
-        //                    Action = new Action()
-        //                    {
-        //                    Name = pam.Action.Name
-        //                    }
-        //                }).ToList(),
+                        //Build PermissionActionMapping
+                        PermissionActionMappings = PermissionActionMappingDAOs.Where(pa => pa.PermissionId == p.Id)
+                        .Select(pam => new PermissionActionMapping()
+                        {
+                            PermissionId = p.Id,
+                            Action = new Action()
+                            {
+                                Name = pam.Action.Name
+                            }
+                        }).ToList(),
 
-        //            //Build PermissionContent
-        //            PermissionContents = PermissionContentDAOs.Where(pc => pc.PermissionId == p.Id)
-        //                .Select(pec => new PermissionContent()
-        //                {
-        //                    Id = pec.Id,
-        //                    PermissionOperatorId = pec.PermissionOperatorId,
-        //                    Value = pec.Value,
-        //                    Field = new Field()
-        //                    {
-        //                        Name = pec.Field.Name
-        //                    },
-        //                }).ToList(),
-        //        }).ToList();
-        //        Role.Permissions = Permissions;
-        //        Roles.Add(Role);
-        //    }
-        //    Site.Roles = Roles;
-        //    return Site;
-        //}
+                        //Build PermissionContent
+                        PermissionContents = PermissionContentDAOs.Where(pc => pc.PermissionId == p.Id)
+                        .Select(pec => new PermissionContent()
+                        {
+                            Id = pec.Id,
+                            PermissionOperatorId = pec.PermissionOperatorId,
+                            Value = pec.Value,
+                            Field = new Field()
+                            {
+                                Name = pec.Field.Name
+                            },
+                        }).ToList(),
+                    }).ToList();
+                Role.Permissions = Permissions;
+                Roles.Add(Role);
+            }
+            Site.Roles = Roles;
+            return Site;
+        }
 
         public async Task<ActionResult> SendMenu()
         {
             Site Site = await BuildMenu();
-            //RabbitManager.PublishSingle(Site, RoutingKeyEnum.MenuSend.Code);
+            await SiteService.BulkMerge(Site);
             return Ok();
         }
 
@@ -256,12 +368,12 @@ namespace Tracnghiem.Rpc
                 Name = "Tracnghiem",
                 IsDisplay = true
             };
-            //List<Type> routeTypes = typeof(SetupController).Assembly.GetTypes()
-            //    .Where(x => typeof(Root).IsAssignableFrom(x) && x.IsClass && x.Name != "Root")
-            //    .ToList();
+            List<Type> routeTypes = typeof(SetupController).Assembly.GetTypes()
+                .Where(x => typeof(Root).IsAssignableFrom(x) && x.IsClass && x.Name != "Root")
+                .ToList();
 
-            //List<Menu> Menus = PermissionBuilder.GenerateMenu(routeTypes, SiteEnum.Tracnghiem.Id);
-            //Site.Menus = Menus;
+            List<Menu> Menus = PermissionBuilder.GenerateMenu(routeTypes, SiteEnum.Tracnghiem.Id);
+            Site.Menus = Menus;
             return Site;
         }
 

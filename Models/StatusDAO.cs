@@ -7,6 +7,7 @@ namespace Tracnghiem.Models
     {
         public StatusDAO()
         {
+            AppUsers = new HashSet<AppUserDAO>();
             Exams = new HashSet<ExamDAO>();
             Questions = new HashSet<QuestionDAO>();
         }
@@ -15,6 +16,7 @@ namespace Tracnghiem.Models
         public string Code { get; set; }
         public string Name { get; set; }
 
+        public virtual ICollection<AppUserDAO> AppUsers { get; set; }
         public virtual ICollection<ExamDAO> Exams { get; set; }
         public virtual ICollection<QuestionDAO> Questions { get; set; }
     }

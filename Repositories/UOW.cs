@@ -28,6 +28,11 @@ namespace Tracnghiem.Repositories
         IRoleRepository RoleRepository { get; }
         IStatusRepository StatusRepository { get; }
         ISubjectRepository SubjectRepository { get; }
+        ISiteRepository SiteRepository { get; }
+        IMenuRepository MenuRepository { get; }
+        IPermissionRepository PermissionRepository { get; }
+        IFieldRepository FieldRepository { get; }
+        IPermissionOperatorRepository PermissionOperatorRepository { get; }
     }
 
     public class UOW : IUOW
@@ -48,6 +53,11 @@ namespace Tracnghiem.Repositories
         public IRoleRepository RoleRepository { get; private set; }
         public IStatusRepository StatusRepository { get; private set; }
         public ISubjectRepository SubjectRepository { get; private set; }
+        public ISiteRepository SiteRepository { get; private set; }
+        public IMenuRepository MenuRepository { get; private set; }
+        public IPermissionRepository PermissionRepository { get; private set; }
+        public IFieldRepository FieldRepository { get; private set; }
+        public IPermissionOperatorRepository PermissionOperatorRepository { get; private set; }
 
         public UOW(DataContext DataContext, IRedisStore RedisStore, IConfiguration Configuration)
         {
@@ -64,9 +74,14 @@ namespace Tracnghiem.Repositories
             QuestionRepository = new QuestionRepository(DataContext);
             QuestionGroupRepository = new QuestionGroupRepository(DataContext);
             QuestionTypeRepository = new QuestionTypeRepository(DataContext);
-            RoleRepository = new RoleRepository(DataContext);
             StatusRepository = new StatusRepository(DataContext);
             SubjectRepository = new SubjectRepository(DataContext);
+            RoleRepository = new RoleRepository(DataContext, RedisStore, Configuration);
+            SiteRepository = new SiteRepository(DataContext, RedisStore, Configuration);
+            MenuRepository = new MenuRepository(DataContext, RedisStore, Configuration);
+            PermissionRepository = new PermissionRepository(DataContext, RedisStore, Configuration);
+            FieldRepository = new FieldRepository(DataContext);
+            PermissionOperatorRepository = new PermissionOperatorRepository(DataContext);
         }
         public async Task Begin()
         {

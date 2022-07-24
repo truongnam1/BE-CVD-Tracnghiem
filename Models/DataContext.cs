@@ -37,10 +37,10 @@ namespace Tracnghiem.Models
         public virtual DbSet<QuestionGroupDAO> QuestionGroup { get; set; }
         public virtual DbSet<QuestionTypeDAO> QuestionType { get; set; }
         public virtual DbSet<RoleDAO> Role { get; set; }
-        public virtual DbSet<Role1DAO> Role1 { get; set; }
         public virtual DbSet<SchemaDAO> Schema { get; set; }
         public virtual DbSet<ServerDAO> Server { get; set; }
         public virtual DbSet<SetDAO> Set { get; set; }
+        public virtual DbSet<SiteDAO> Site { get; set; }
         public virtual DbSet<StateDAO> State { get; set; }
         public virtual DbSet<StatusDAO> Status { get; set; }
         public virtual DbSet<SubjectDAO> Subject { get; set; }
@@ -63,8 +63,6 @@ namespace Tracnghiem.Models
             modelBuilder.ConfigureTempTable<long>();modelBuilder.ConfigureTempTable<Guid>();modelBuilder.Entity<ActionDAO>(entity =>
             {
                 entity.ToTable("Action", "PER");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -114,6 +112,10 @@ namespace Tracnghiem.Models
 
             modelBuilder.Entity<AppUserDAO>(entity =>
             {
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+
+                entity.Property(e => e.DeletedAt).HasColumnType("datetime");
+
                 entity.Property(e => e.DisplayName)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -128,6 +130,8 @@ namespace Tracnghiem.Models
 
                 entity.Property(e => e.RefreshToken).HasMaxLength(4000);
 
+                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
                 entity.Property(e => e.Username)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -137,10 +141,11 @@ namespace Tracnghiem.Models
                     .HasForeignKey(d => d.ImageId)
                     .HasConstraintName("FK_AppUser_Image");
 
-                entity.HasOne(d => d.Role)
+                entity.HasOne(d => d.Status)
                     .WithMany(p => p.AppUsers)
-                    .HasForeignKey(d => d.RoleId)
-                    .HasConstraintName("FK_AppUser_Role");
+                    .HasForeignKey(d => d.StatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AppUser_Status");
             });
 
             modelBuilder.Entity<AppUserRoleMappingDAO>(entity =>
@@ -148,6 +153,12 @@ namespace Tracnghiem.Models
                 entity.HasKey(e => new { e.AppUserId, e.RoleId });
 
                 entity.ToTable("AppUserRoleMapping", "PER");
+
+                entity.HasOne(d => d.AppUser)
+                    .WithMany(p => p.AppUserRoleMappings)
+                    .HasForeignKey(d => d.AppUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AppUserRoleMapping_AppUser");
 
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.AppUserRoleMappings)
@@ -309,8 +320,6 @@ namespace Tracnghiem.Models
             {
                 entity.ToTable("Field", "PER");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -461,8 +470,6 @@ namespace Tracnghiem.Models
             {
                 entity.ToTable("Menu", "PER");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Code)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -470,13 +477,17 @@ namespace Tracnghiem.Models
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(500);
+
+                entity.HasOne(d => d.Site)
+                    .WithMany(p => p.Menus)
+                    .HasForeignKey(d => d.SiteId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Menu_Site");
             });
 
             modelBuilder.Entity<PageDAO>(entity =>
             {
                 entity.ToTable("Page", "PER");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -490,8 +501,6 @@ namespace Tracnghiem.Models
             modelBuilder.Entity<PermissionDAO>(entity =>
             {
                 entity.ToTable("Permission", "PER");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Code)
                     .IsRequired()
@@ -536,8 +545,6 @@ namespace Tracnghiem.Models
             modelBuilder.Entity<PermissionContentDAO>(entity =>
             {
                 entity.ToTable("PermissionContent", "PER");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Value)
                     .IsRequired()
@@ -677,25 +684,8 @@ namespace Tracnghiem.Models
 
             modelBuilder.Entity<RoleDAO>(entity =>
             {
-                entity.ToTable("Role", "ENUM");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.Code)
-                    .IsRequired()
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(500);
-            });
-
-            modelBuilder.Entity<Role1DAO>(entity =>
-            {
                 entity.ToTable("Role", "PER");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Code)
                     .IsRequired()
                     .HasMaxLength(500);
@@ -703,6 +693,12 @@ namespace Tracnghiem.Models
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(500);
+
+                entity.HasOne(d => d.Site)
+                    .WithMany(p => p.Roles)
+                    .HasForeignKey(d => d.SiteId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Role_Site");
             });
 
             modelBuilder.Entity<SchemaDAO>(entity =>
@@ -746,6 +742,23 @@ namespace Tracnghiem.Models
                 entity.Property(e => e.Value).HasMaxLength(256);
 
                 entity.Property(e => e.ExpireAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<SiteDAO>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Code)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Description).HasMaxLength(1000);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(300);
+
+                entity.Property(e => e.Value).HasMaxLength(500);
             });
 
             modelBuilder.Entity<StateDAO>(entity =>

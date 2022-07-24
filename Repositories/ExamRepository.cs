@@ -212,7 +212,6 @@ namespace Tracnghiem.Repositories
                     DisplayName = q.Creator.DisplayName,
                     Password = q.Creator.Password,
                     RefreshToken = q.Creator.RefreshToken,
-                    RoleId = q.Creator.RoleId,
                     ImageId = q.Creator.ImageId,
                 } : null,
                 ExamLevel = filter.Selects.Contains(ExamSelect.ExamLevel) && q.ExamLevel != null ? new ExamLevel
@@ -318,7 +317,6 @@ namespace Tracnghiem.Repositories
                     DisplayName = x.Creator.DisplayName,
                     Password = x.Creator.Password,
                     RefreshToken = x.Creator.RefreshToken,
-                    RoleId = x.Creator.RoleId,
                     ImageId = x.Creator.ImageId,
                 },
                 ExamLevel = x.ExamLevel == null ? null : new ExamLevel
@@ -423,7 +421,6 @@ namespace Tracnghiem.Repositories
                     DisplayName = x.Creator.DisplayName,
                     Password = x.Creator.Password,
                     RefreshToken = x.Creator.RefreshToken,
-                    RoleId = x.Creator.RoleId,
                     ImageId = x.Creator.ImageId,
                 },
                 ExamLevel = x.ExamLevel == null ? null : new ExamLevel
