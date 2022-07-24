@@ -34,12 +34,12 @@ namespace Tracnghiem.Rpc
             DataContext DataContext,
             IConfiguration Configuration,
             IRedisStore RedisStore,
-            IRabbitManager RabbitManager,
+            //IRabbitManager RabbitManager,
             IUOW UOW
             )
         {
             this.DataContext = DataContext;
-            this.RabbitManager = RabbitManager;
+            //this.RabbitManager = RabbitManager;
             this.UOW = UOW;
             this.RedisStore = RedisStore;
         }
@@ -53,7 +53,14 @@ namespace Tracnghiem.Rpc
         [HttpGet, Route("rpc/tracnghiem/setup/init-enum")]
         public async Task<ActionResult> InitEnums()
         {
-            
+            InitStatusEnum();
+            InitExamLevelEnum();
+            InitExamStatusEnum();
+            InitGradeEnum();
+            //InitQuestionGroupEnum();
+            //InitQuestionTypeEnum();
+            //InitRoleEnum();
+            //InitSubjectEnum();
             return Ok();
         }
         private void InitStatusEnum()
