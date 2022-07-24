@@ -1,0 +1,7 @@
+{
+  "Image": {
+      "Id": "@Id",
+      "Name": "@Name",
+      "Url": "@Url",
+  }
+}

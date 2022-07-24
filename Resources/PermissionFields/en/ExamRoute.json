@@ -1,0 +1,24 @@
+{
+  "Exam": {
+      "Id": "@Id",
+      "Code": "@Code",
+      "Name": "@Name",
+      "SubjectId": "@SubjectId",
+      "ExamLevelId": "@ExamLevelId",
+      "StatusId": "@StatusId",
+      "CreatorId": "@CreatorId",
+      "GradeId": "@GradeId",
+      "ExamStatusId": "@ExamStatusId",
+      "TotalMark": "@TotalMark",
+      "TotalQuestion": "@TotalQuestion",
+      "ImageId": "@ImageId",
+      "Time": "@Time",
+      "Creator": "@Creator",
+      "ExamLevel": "@ExamLevel",
+      "ExamStatus": "@ExamStatus",
+      "Grade": "@Grade",
+      "Image": "@Image",
+      "Status": "@Status",
+      "Subject": "@Subject",
+  }
+}

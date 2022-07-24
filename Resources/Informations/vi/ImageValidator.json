@@ -1,0 +1,15 @@
+{
+  "Image": {
+    "Id": {
+      "IdNotExisted": "Đối tượng không tồn tại"
+    },
+    "Name": {
+      "NameEmpty": "Chưa nhập @Name",
+      "NameOverLength": "Name quá dài"
+    },
+    "Url": {
+      "UrlEmpty": "Chưa nhập @Url",
+      "UrlOverLength": "Url quá dài"
+    }
+  }
+}

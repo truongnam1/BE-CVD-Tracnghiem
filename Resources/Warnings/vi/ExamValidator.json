@@ -1,0 +1,77 @@
+{
+  "Exam": {
+    "Id": {
+      "IdNotExisted": "Đối tượng không tồn tại"
+    },
+    "Code": {
+      "CodeEmpty": "Chưa nhập @Code",
+      "CodeOverLength": "Code quá dài"
+    },
+    "Name": {
+      "NameEmpty": "Chưa nhập @Name",
+      "NameOverLength": "Name quá dài"
+    },
+    "SubjectId": {
+    },
+    "ExamLevelId": {
+    },
+    "StatusId": {
+    },
+    "CreatorId": {
+    },
+    "GradeId": {
+    },
+    "ExamStatusId": {
+    },
+    "TotalMark": {
+    },
+    "TotalQuestion": {
+    },
+    "ImageId": {
+    },
+    "Time": {
+    },
+    "Creator": {
+      "CreatorEmpty": "Chưa chọn @Creator",
+      "CreatorNotExisted": "@Creator không tồn tại"
+    },
+    "ExamLevel": {
+      "ExamLevelEmpty": "Chưa chọn @ExamLevel",
+      "ExamLevelNotExisted": "@ExamLevel không tồn tại"
+    },
+    "ExamStatus": {
+      "ExamStatusEmpty": "Chưa chọn @ExamStatus",
+      "ExamStatusNotExisted": "@ExamStatus không tồn tại"
+    },
+    "Grade": {
+      "GradeEmpty": "Chưa chọn @Grade",
+      "GradeNotExisted": "@Grade không tồn tại"
+    },
+    "Image": {
+      "ImageEmpty": "Chưa chọn @Image",
+      "ImageNotExisted": "@Image không tồn tại"
+    },
+    "Status": {
+      "StatusEmpty": "Chưa chọn @Status",
+      "StatusNotExisted": "@Status không tồn tại"
+    },
+    "Subject": {
+      "SubjectEmpty": "Chưa chọn @Subject",
+      "SubjectNotExisted": "@Subject không tồn tại"
+    },
+    "ExamQuestionMapping": {
+        "ExamId": {
+        },
+        "QuestionId": {
+        },
+        "Mark": {
+        },
+        "Exam": {
+        },
+        "Question": {
+            "ExamQuestionMapping_QuestionEmpty": "Chưa chọn @ExamQuestionMapping_Question",
+            "ExamQuestionMapping_QuestionNotExisted": "@ExamQuestionMapping_Question không tồn tại"
+        }
+    }
+  }
+}
