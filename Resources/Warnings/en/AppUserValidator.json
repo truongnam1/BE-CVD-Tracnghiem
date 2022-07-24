@@ -1,0 +1,60 @@
+{
+  "AppUser": {
+    "Id": {
+      "IdNotExisted": "Đối tượng không tồn tại"
+    },
+    "Username": {
+      "UsernameEmpty": "Chưa nhập @Username",
+      "UsernameOverLength": "Username quá dài"
+    },
+    "DisplayName": {
+      "DisplayNameEmpty": "Chưa nhập @DisplayName",
+      "DisplayNameOverLength": "DisplayName quá dài"
+    },
+    "Password": {
+      "PasswordEmpty": "Chưa nhập @Password",
+      "PasswordOverLength": "Password quá dài"
+    },
+    "RefreshToken": {
+      "RefreshTokenEmpty": "Chưa nhập @RefreshToken",
+      "RefreshTokenOverLength": "RefreshToken quá dài"
+    },
+    "RoleId": {
+    },
+    "ImageId": {
+    },
+    "Image": {
+      "ImageEmpty": "Chưa chọn @Image",
+      "ImageNotExisted": "@Image không tồn tại"
+    },
+    "Role": {
+      "RoleEmpty": "Chưa chọn @Role",
+      "RoleNotExisted": "@Role không tồn tại"
+    },
+    "ExamHistory": {
+        "Id": {
+        },
+        "AppUserId": {
+        },
+        "ExamId": {
+        },
+        "Times": {
+        },
+        "CorrectAnswerQuantity": {
+        },
+        "TotalQuestionQuantity": {
+        },
+        "Mark": {
+        },
+        "ExamedAt": {
+            "_ExamedAtEmpty": "Chưa nhập @_ExamedAt"
+        },
+        "AppUser": {
+        },
+        "Exam": {
+            "ExamHistory_ExamEmpty": "Chưa chọn @ExamHistory_Exam",
+            "ExamHistory_ExamNotExisted": "@ExamHistory_Exam không tồn tại"
+        }
+    }
+  }
+}

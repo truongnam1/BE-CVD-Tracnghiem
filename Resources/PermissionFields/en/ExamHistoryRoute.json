@@ -1,0 +1,14 @@
+{
+  "ExamHistory": {
+      "Id": "@Id",
+      "AppUserId": "@AppUserId",
+      "ExamId": "@ExamId",
+      "Times": "@Times",
+      "CorrectAnswerQuantity": "@CorrectAnswerQuantity",
+      "TotalQuestionQuantity": "@TotalQuestionQuantity",
+      "Mark": "@Mark",
+      "ExamedAt": "@ExamedAt",
+      "AppUser": "@AppUser",
+      "Exam": "@Exam",
+  }
+}

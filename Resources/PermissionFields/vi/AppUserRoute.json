@@ -1,0 +1,13 @@
+{
+  "AppUser": {
+      "Id": "@Id",
+      "Username": "@Username",
+      "DisplayName": "@DisplayName",
+      "Password": "@Password",
+      "RefreshToken": "@RefreshToken",
+      "RoleId": "@RoleId",
+      "ImageId": "@ImageId",
+      "Image": "@Image",
+      "Role": "@Role",
+  }
+}

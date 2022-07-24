@@ -1,0 +1,19 @@
+{
+  "Question": {
+      "Id": "@Id",
+      "Code": "@Code",
+      "Name": "@Name",
+      "SubjectId": "@SubjectId",
+      "QuestionGroupId": "@QuestionGroupId",
+      "QuestionTypeId": "@QuestionTypeId",
+      "Content": "@Content",
+      "StatusId": "@StatusId",
+      "CreatorId": "@CreatorId",
+      "GradeId": "@GradeId",
+      "Grade": "@Grade",
+      "QuestionGroup": "@QuestionGroup",
+      "QuestionType": "@QuestionType",
+      "Status": "@Status",
+      "Subject": "@Subject",
+  }
+}

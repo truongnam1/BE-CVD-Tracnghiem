@@ -1,0 +1,31 @@
+{
+  "ExamHistory": {
+    "Id": {
+      "IdNotExisted": "Đối tượng không tồn tại"
+    },
+    "AppUserId": {
+    },
+    "ExamId": {
+    },
+    "Times": {
+    },
+    "CorrectAnswerQuantity": {
+    },
+    "TotalQuestionQuantity": {
+    },
+    "Mark": {
+    },
+    "ExamedAt": {
+      "ExamedAtEmpty": "Chưa nhập @ExamedAt",
+      "ExamedAtInvalid": "@ExamedAt không hợp lệ"
+    },
+    "AppUser": {
+      "AppUserEmpty": "Chưa chọn @AppUser",
+      "AppUserNotExisted": "@AppUser không tồn tại"
+    },
+    "Exam": {
+      "ExamEmpty": "Chưa chọn @Exam",
+      "ExamNotExisted": "@Exam không tồn tại"
+    }
+  }
+}

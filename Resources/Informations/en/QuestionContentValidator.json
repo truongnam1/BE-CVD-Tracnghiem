@@ -1,0 +1,19 @@
+{
+  "QuestionContent": {
+    "Id": {
+      "IdNotExisted": "Đối tượng không tồn tại"
+    },
+    "QuestionId": {
+    },
+    "AnswerContent": {
+      "AnswerContentEmpty": "Chưa nhập @AnswerContent",
+      "AnswerContentOverLength": "AnswerContent quá dài"
+    },
+    "IsRight": {
+    },
+    "Question": {
+      "QuestionEmpty": "Chưa chọn @Question",
+      "QuestionNotExisted": "@Question không tồn tại"
+    }
+  }
+}

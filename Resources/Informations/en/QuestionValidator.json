@@ -1,0 +1,65 @@
+{
+  "Question": {
+    "Id": {
+      "IdNotExisted": "Đối tượng không tồn tại"
+    },
+    "Code": {
+      "CodeEmpty": "Chưa nhập @Code",
+      "CodeOverLength": "Code quá dài"
+    },
+    "Name": {
+      "NameEmpty": "Chưa nhập @Name",
+      "NameOverLength": "Name quá dài"
+    },
+    "SubjectId": {
+    },
+    "QuestionGroupId": {
+    },
+    "QuestionTypeId": {
+    },
+    "Content": {
+      "ContentEmpty": "Chưa nhập @Content",
+      "ContentOverLength": "Content quá dài"
+    },
+    "StatusId": {
+    },
+    "CreatorId": {
+    },
+    "GradeId": {
+    },
+    "Grade": {
+      "GradeEmpty": "Chưa chọn @Grade",
+      "GradeNotExisted": "@Grade không tồn tại"
+    },
+    "QuestionGroup": {
+      "QuestionGroupEmpty": "Chưa chọn @QuestionGroup",
+      "QuestionGroupNotExisted": "@QuestionGroup không tồn tại"
+    },
+    "QuestionType": {
+      "QuestionTypeEmpty": "Chưa chọn @QuestionType",
+      "QuestionTypeNotExisted": "@QuestionType không tồn tại"
+    },
+    "Status": {
+      "StatusEmpty": "Chưa chọn @Status",
+      "StatusNotExisted": "@Status không tồn tại"
+    },
+    "Subject": {
+      "SubjectEmpty": "Chưa chọn @Subject",
+      "SubjectNotExisted": "@Subject không tồn tại"
+    },
+    "QuestionContent": {
+        "Id": {
+        },
+        "QuestionId": {
+        },
+        "AnswerContent": {
+            "QuestionContent_AnswerContentEmpty": "Chưa nhập @QuestionContent_AnswerContent",
+            "QuestionContent_AnswerContentOverLength": "@QuestionContent_AnswerContent quá dài"
+        },
+        "IsRight": {
+        },
+        "Question": {
+        }
+    }
+  }
+}
