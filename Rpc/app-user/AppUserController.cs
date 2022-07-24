@@ -86,6 +86,7 @@ namespace Tracnghiem.Rpc.app_user
             return new AppUser_AppUserDTO(AppUser);
         }
 
+        [AllowAnonymous]
         [Route(AppUserRoute.Create), HttpPost]
         public async Task<ActionResult<AppUser_AppUserDTO>> Create([FromBody] AppUser_AppUserDTO AppUser_AppUserDTO)
         {
@@ -328,6 +329,7 @@ namespace Tracnghiem.Rpc.app_user
             AppUser.Id = AppUser_AppUserDTO.Id;
             AppUser.Username = AppUser_AppUserDTO.Username;
             AppUser.DisplayName = AppUser_AppUserDTO.DisplayName;
+            AppUser.Email = AppUser_AppUserDTO.Email;
             AppUser.Password = AppUser_AppUserDTO.Password;
             AppUser.RefreshToken = AppUser_AppUserDTO.RefreshToken;
             AppUser.RoleId = AppUser_AppUserDTO.RoleId;

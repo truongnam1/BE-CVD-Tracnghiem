@@ -18,7 +18,6 @@ using Action = TrueSight.PER.Entities.Action;
 using Role = TrueSight.PER.Entities.Role;
 using Microsoft.Extensions.Configuration;
 using Tracnghiem.Repositories;
-using Tracnghiem.Handlers.Configuration;
 
 namespace Tracnghiem.Rpc
 {
@@ -28,7 +27,6 @@ namespace Tracnghiem.Rpc
         private DataContext DataContext;
         private IConfiguration Configuration;
         private IRedisStore RedisStore;
-        private IRabbitManager RabbitManager;
         private IUOW UOW;
         public SetupController(
             DataContext DataContext,
@@ -246,7 +244,7 @@ namespace Tracnghiem.Rpc
         public async Task<ActionResult> SendMenu()
         {
             Site Site = await BuildMenu();
-            RabbitManager.PublishSingle(Site, RoutingKeyEnum.MenuSend.Code);
+            //RabbitManager.PublishSingle(Site, RoutingKeyEnum.MenuSend.Code);
             return Ok();
         }
 
@@ -272,7 +270,7 @@ namespace Tracnghiem.Rpc
         {
             List<MasterEntity> MasterEntities = GenerateMasterEntity();
 
-            RabbitManager.PublishList(MasterEntities, RoutingKeyEnum.MasterEntityRegister.Code);
+            //RabbitManager.PublishList(MasterEntities, RoutingKeyEnum.MasterEntityRegister.Code);
             return Ok();
         }
 

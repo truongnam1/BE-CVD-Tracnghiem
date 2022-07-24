@@ -140,7 +140,7 @@ namespace Tracnghiem.Repositories
                 DisplayName = filter.Selects.Contains(AppUserSelect.DisplayName) ? q.DisplayName : default(string),
                 Password = filter.Selects.Contains(AppUserSelect.Password) ? q.Password : default(string),
                 RefreshToken = filter.Selects.Contains(AppUserSelect.RefreshToken) ? q.RefreshToken : default(string),
-                RoleId = filter.Selects.Contains(AppUserSelect.Role) ? q.RoleId : default(long),
+                RoleId = filter.Selects.Contains(AppUserSelect.Role) ? q.RoleId : default(long?),
                 ImageId = filter.Selects.Contains(AppUserSelect.Image) ? q.ImageId : default(long?),
                 Image = filter.Selects.Contains(AppUserSelect.Image) && q.Image != null ? new Image
                 {
@@ -323,6 +323,7 @@ namespace Tracnghiem.Repositories
             AppUserDAO.Id = AppUser.Id;
             AppUserDAO.Username = AppUser.Username;
             AppUserDAO.DisplayName = AppUser.DisplayName;
+            AppUserDAO.Email = AppUser.Email;
             AppUserDAO.Password = AppUser.Password;
             AppUserDAO.RefreshToken = AppUser.RefreshToken;
             AppUserDAO.RoleId = AppUser.RoleId;

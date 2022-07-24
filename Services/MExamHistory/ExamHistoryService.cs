@@ -1,5 +1,4 @@
 using TrueSight.Common;
-using Tracnghiem.Handlers.Configuration;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
 using System;
@@ -30,7 +29,6 @@ namespace Tracnghiem.Services.MExamHistory
     public class ExamHistoryService : BaseService, IExamHistoryService
     {
         private IUOW UOW;
-        private IRabbitManager RabbitManager;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
         
@@ -39,13 +37,11 @@ namespace Tracnghiem.Services.MExamHistory
         public ExamHistoryService(
             IUOW UOW,
             ICurrentContext CurrentContext,
-            IRabbitManager RabbitManager,
             IExamHistoryValidator ExamHistoryValidator,
             ILogging Logging
         )
         {
             this.UOW = UOW;
-            this.RabbitManager = RabbitManager;
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
            
@@ -98,7 +94,6 @@ namespace Tracnghiem.Services.MExamHistory
             {
                 await UOW.ExamHistoryRepository.Create(ExamHistory);
                 ExamHistory = await UOW.ExamHistoryRepository.Get(ExamHistory.Id);
-                Sync(new List<ExamHistory> { ExamHistory });
                 return ExamHistory;
             }
             catch (Exception ex)
@@ -119,7 +114,6 @@ namespace Tracnghiem.Services.MExamHistory
                 await UOW.ExamHistoryRepository.Update(ExamHistory);
 
                 ExamHistory = await UOW.ExamHistoryRepository.Get(ExamHistory.Id);
-                Sync(new List<ExamHistory> { ExamHistory });
                 return ExamHistory;
             }
             catch (Exception ex)
@@ -171,7 +165,6 @@ namespace Tracnghiem.Services.MExamHistory
             {
                 var Ids = await UOW.ExamHistoryRepository.BulkMerge(ExamHistories);
                 ExamHistories = await UOW.ExamHistoryRepository.List(Ids);
-                Sync(ExamHistories);
                 return ExamHistories;
             }
             catch (Exception ex)
@@ -220,14 +213,6 @@ namespace Tracnghiem.Services.MExamHistory
                 }
             }
             return filter;
-        }
-
-        private void Sync(List<ExamHistory> ExamHistories)
-        {
-            RabbitManager.PublishList(ExamHistories, RoutingKeyEnum.ExamHistorySync.Code);
-
-
-            
         }
     }
 }

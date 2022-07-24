@@ -1,5 +1,4 @@
 using TrueSight.Common;
-using Tracnghiem.Handlers.Configuration;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
 using System;
@@ -30,7 +29,6 @@ namespace Tracnghiem.Services.MImage
     public class ImageService : BaseService, IImageService
     {
         private IUOW UOW;
-        private IRabbitManager RabbitManager;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
         
@@ -39,13 +37,11 @@ namespace Tracnghiem.Services.MImage
         public ImageService(
             IUOW UOW,
             ICurrentContext CurrentContext,
-            IRabbitManager RabbitManager,
             IImageValidator ImageValidator,
             ILogging Logging
         )
         {
             this.UOW = UOW;
-            this.RabbitManager = RabbitManager;
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
            
@@ -98,7 +94,6 @@ namespace Tracnghiem.Services.MImage
             {
                 await UOW.ImageRepository.Create(Image);
                 Image = await UOW.ImageRepository.Get(Image.Id);
-                Sync(new List<Image> { Image });
                 return Image;
             }
             catch (Exception ex)
@@ -119,7 +114,6 @@ namespace Tracnghiem.Services.MImage
                 await UOW.ImageRepository.Update(Image);
 
                 Image = await UOW.ImageRepository.Get(Image.Id);
-                Sync(new List<Image> { Image });
                 return Image;
             }
             catch (Exception ex)
@@ -171,7 +165,6 @@ namespace Tracnghiem.Services.MImage
             {
                 var Ids = await UOW.ImageRepository.BulkMerge(Images);
                 Images = await UOW.ImageRepository.List(Ids);
-                Sync(Images);
                 return Images;
             }
             catch (Exception ex)
@@ -210,14 +203,6 @@ namespace Tracnghiem.Services.MImage
                 }
             }
             return filter;
-        }
-
-        private void Sync(List<Image> Images)
-        {
-            RabbitManager.PublishList(Images, RoutingKeyEnum.ImageSync.Code);
-
-
-            
         }
     }
 }

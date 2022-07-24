@@ -21,4 +21,8 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
         <PackageReference Include="TrueSight" Version="3.7.26" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Handlers\" />
+    </ItemGroup>
 </Project>

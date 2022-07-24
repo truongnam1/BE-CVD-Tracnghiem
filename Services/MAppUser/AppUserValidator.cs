@@ -9,6 +9,7 @@ using Tracnghiem.Enums;
 using Tracnghiem.Entities;
 using Tracnghiem.Repositories;
 using Tracnghiem.Helpers;
+using System.Security.Cryptography;
 
 namespace Tracnghiem.Services.MAppUser
 {
@@ -18,6 +19,11 @@ namespace Tracnghiem.Services.MAppUser
         Task<bool> Create(AppUser AppUser);
         Task<bool> Update(AppUser AppUser);
         Task<bool> Delete(AppUser AppUser);
+        Task<bool> Login(AppUser AppUser);
+        Task<bool> ChangePassword(AppUser AppUser);
+        Task<bool> ForgotPassword(AppUser AppUser);
+        Task<bool> AdminChangePassword(AppUser AppUser);
+        Task<bool> RefreshToken(AppUser AppUser);
         Task<bool> BulkDelete(List<AppUser> AppUsers);
         Task<bool> Import(List<AppUser> AppUsers);
     }
@@ -229,6 +235,78 @@ namespace Tracnghiem.Services.MAppUser
 
             }
             return true;
+        }
+
+        public async Task<bool> Login(AppUser AppUser)
+        {
+            if (string.IsNullOrWhiteSpace(AppUser.Username))
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameEmpty);
+                return false;
+            }
+            List<AppUser> AppUsers = await UOW.AppUserRepository.List(new AppUserFilter
+            {
+                Skip = 0,
+                Take = 1,
+                Username = new StringFilter { Equal = AppUser.Username },
+                Selects = AppUserSelect.ALL,
+                //StatusId = new IdFilter { Equal = StatusEnum.ACTIVE.Id }
+            });
+            if (AppUsers.Count == 0)
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameNotExisted);
+                return false;
+            }
+            else
+            {
+                AppUser appUser = AppUsers.FirstOrDefault();
+                
+                bool verify = VerifyPassword(appUser.Password, AppUser.Password);
+                if (verify == false)
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.PasswordNotMatch);
+                    return false;
+                }
+                AppUser.Id = appUser.Id;
+
+
+            }
+            return AppUser.IsValidated;
+        }
+        private bool VerifyPassword(string oldPassword, string newPassword)
+        {
+            byte[] hashBytes = Convert.FromBase64String(oldPassword);
+            /* Get the salt */
+            byte[] salt = new byte[16];
+            Array.Copy(hashBytes, 0, salt, 0, 16);
+            /* Compute the hash on the password the user entered */
+            var pbkdf2 = new Rfc2898DeriveBytes(newPassword, salt, 10000);
+            byte[] hash = pbkdf2.GetBytes(20);
+            /* Compare the results */
+            for (int i = 0; i < 20; i++)
+                if (hashBytes[i + 16] != hash[i])
+                    return false;
+            return true;
+        }
+
+        public Task<bool> ChangePassword(AppUser AppUser)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ForgotPassword(AppUser AppUser)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> AdminChangePassword(AppUser AppUser)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RefreshToken(AppUser AppUser)
+        {
+            throw new NotImplementedException();
         }
     }
 }

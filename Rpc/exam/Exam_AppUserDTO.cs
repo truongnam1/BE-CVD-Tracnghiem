@@ -14,7 +14,7 @@ namespace Tracnghiem.Rpc.exam
         public string DisplayName { get; set; }
         public string Password { get; set; }
         public string RefreshToken { get; set; }
-        public long RoleId { get; set; }
+        public long? RoleId { get; set; }
         public long? ImageId { get; set; }
         public Exam_AppUserDTO() {}
         public Exam_AppUserDTO(AppUser AppUser)

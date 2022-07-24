@@ -1,5 +1,4 @@
 using TrueSight.Common;
-using Tracnghiem.Handlers.Configuration;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
 using System;
@@ -23,7 +22,6 @@ namespace Tracnghiem.Services.MGrade
     public class GradeService : BaseService, IGradeService
     {
         private IUOW UOW;
-        private IRabbitManager RabbitManager;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
         
@@ -31,12 +29,10 @@ namespace Tracnghiem.Services.MGrade
         public GradeService(
             IUOW UOW,
             ICurrentContext CurrentContext,
-            IRabbitManager RabbitManager,
             ILogging Logging
         )
         {
             this.UOW = UOW;
-            this.RabbitManager = RabbitManager;
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
            

@@ -1,5 +1,4 @@
 using TrueSight.Common;
-using Tracnghiem.Handlers.Configuration;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
 using System;
@@ -30,7 +29,6 @@ namespace Tracnghiem.Services.MQuestionContent
     public class QuestionContentService : BaseService, IQuestionContentService
     {
         private IUOW UOW;
-        private IRabbitManager RabbitManager;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
         
@@ -39,13 +37,11 @@ namespace Tracnghiem.Services.MQuestionContent
         public QuestionContentService(
             IUOW UOW,
             ICurrentContext CurrentContext,
-            IRabbitManager RabbitManager,
             IQuestionContentValidator QuestionContentValidator,
             ILogging Logging
         )
         {
             this.UOW = UOW;
-            this.RabbitManager = RabbitManager;
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
            
@@ -98,7 +94,6 @@ namespace Tracnghiem.Services.MQuestionContent
             {
                 await UOW.QuestionContentRepository.Create(QuestionContent);
                 QuestionContent = await UOW.QuestionContentRepository.Get(QuestionContent.Id);
-                Sync(new List<QuestionContent> { QuestionContent });
                 return QuestionContent;
             }
             catch (Exception ex)
@@ -119,7 +114,6 @@ namespace Tracnghiem.Services.MQuestionContent
                 await UOW.QuestionContentRepository.Update(QuestionContent);
 
                 QuestionContent = await UOW.QuestionContentRepository.Get(QuestionContent.Id);
-                Sync(new List<QuestionContent> { QuestionContent });
                 return QuestionContent;
             }
             catch (Exception ex)
@@ -171,7 +165,6 @@ namespace Tracnghiem.Services.MQuestionContent
             {
                 var Ids = await UOW.QuestionContentRepository.BulkMerge(QuestionContents);
                 QuestionContents = await UOW.QuestionContentRepository.List(Ids);
-                Sync(QuestionContents);
                 return QuestionContents;
             }
             catch (Exception ex)
@@ -210,14 +203,6 @@ namespace Tracnghiem.Services.MQuestionContent
                 }
             }
             return filter;
-        }
-
-        private void Sync(List<QuestionContent> QuestionContents)
-        {
-            RabbitManager.PublishList(QuestionContents, RoutingKeyEnum.QuestionContentSync.Code);
-
-
-            
         }
     }
 }

@@ -1,5 +1,4 @@
 using TrueSight.Common;
-using Tracnghiem.Handlers.Configuration;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
 using System;
@@ -30,7 +29,6 @@ namespace Tracnghiem.Services.MExam
     public class ExamService : BaseService, IExamService
     {
         private IUOW UOW;
-        private IRabbitManager RabbitManager;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
         
@@ -39,13 +37,11 @@ namespace Tracnghiem.Services.MExam
         public ExamService(
             IUOW UOW,
             ICurrentContext CurrentContext,
-            IRabbitManager RabbitManager,
             IExamValidator ExamValidator,
             ILogging Logging
         )
         {
             this.UOW = UOW;
-            this.RabbitManager = RabbitManager;
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
            
@@ -98,7 +94,6 @@ namespace Tracnghiem.Services.MExam
             {
                 await UOW.ExamRepository.Create(Exam);
                 Exam = await UOW.ExamRepository.Get(Exam.Id);
-                Sync(new List<Exam> { Exam });
                 return Exam;
             }
             catch (Exception ex)
@@ -119,7 +114,6 @@ namespace Tracnghiem.Services.MExam
                 await UOW.ExamRepository.Update(Exam);
 
                 Exam = await UOW.ExamRepository.Get(Exam.Id);
-                Sync(new List<Exam> { Exam });
                 return Exam;
             }
             catch (Exception ex)
@@ -171,7 +165,6 @@ namespace Tracnghiem.Services.MExam
             {
                 var Ids = await UOW.ExamRepository.BulkMerge(Exams);
                 Exams = await UOW.ExamRepository.List(Ids);
-                Sync(Exams);
                 return Exams;
             }
             catch (Exception ex)
@@ -230,14 +223,6 @@ namespace Tracnghiem.Services.MExam
                 }
             }
             return filter;
-        }
-
-        private void Sync(List<Exam> Exams)
-        {
-            RabbitManager.PublishList(Exams, RoutingKeyEnum.ExamSync.Code);
-
-
-            
         }
     }
 }

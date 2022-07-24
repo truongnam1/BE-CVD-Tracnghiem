@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Tracnghiem.Models
@@ -16,8 +16,9 @@ namespace Tracnghiem.Models
         public string DisplayName { get; set; }
         public string Password { get; set; }
         public string RefreshToken { get; set; }
-        public long RoleId { get; set; }
+        public long? RoleId { get; set; }
         public long? ImageId { get; set; }
+        public string Email { get; set; }
 
         public virtual ImageDAO Image { get; set; }
         public virtual RoleDAO Role { get; set; }

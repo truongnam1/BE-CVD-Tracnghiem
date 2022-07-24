@@ -33,7 +33,6 @@ using Thinktecture;
 using Z.EntityFramework.Extensions;
 using Tracnghiem.Models;
 using Tracnghiem.Rpc;
-using Tracnghiem.Handlers.Configuration;
 using Tracnghiem.Services;
 using Tracnghiem.Repositories;
 

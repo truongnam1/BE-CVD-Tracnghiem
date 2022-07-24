@@ -1,5 +1,4 @@
 using TrueSight.Common;
-using Tracnghiem.Handlers.Configuration;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
 using System;
@@ -30,7 +29,6 @@ namespace Tracnghiem.Services.MQuestion
     public class QuestionService : BaseService, IQuestionService
     {
         private IUOW UOW;
-        private IRabbitManager RabbitManager;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
         
@@ -39,13 +37,11 @@ namespace Tracnghiem.Services.MQuestion
         public QuestionService(
             IUOW UOW,
             ICurrentContext CurrentContext,
-            IRabbitManager RabbitManager,
             IQuestionValidator QuestionValidator,
             ILogging Logging
         )
         {
             this.UOW = UOW;
-            this.RabbitManager = RabbitManager;
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
            
@@ -98,7 +94,6 @@ namespace Tracnghiem.Services.MQuestion
             {
                 await UOW.QuestionRepository.Create(Question);
                 Question = await UOW.QuestionRepository.Get(Question.Id);
-                Sync(new List<Question> { Question });
                 return Question;
             }
             catch (Exception ex)
@@ -119,7 +114,6 @@ namespace Tracnghiem.Services.MQuestion
                 await UOW.QuestionRepository.Update(Question);
 
                 Question = await UOW.QuestionRepository.Get(Question.Id);
-                Sync(new List<Question> { Question });
                 return Question;
             }
             catch (Exception ex)
@@ -171,7 +165,6 @@ namespace Tracnghiem.Services.MQuestion
             {
                 var Ids = await UOW.QuestionRepository.BulkMerge(Questions);
                 Questions = await UOW.QuestionRepository.List(Ids);
-                Sync(Questions);
                 return Questions;
             }
             catch (Exception ex)
@@ -224,14 +217,6 @@ namespace Tracnghiem.Services.MQuestion
                 }
             }
             return filter;
-        }
-
-        private void Sync(List<Question> Questions)
-        {
-            RabbitManager.PublishList(Questions, RoutingKeyEnum.QuestionSync.Code);
-
-
-            
         }
     }
 }

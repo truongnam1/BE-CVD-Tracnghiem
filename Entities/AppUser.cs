@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Tracnghiem.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Tracnghiem.Helpers;
 
 namespace Tracnghiem.Entities
 {
@@ -13,11 +14,18 @@ namespace Tracnghiem.Entities
         public string Username { get; set; }
         public string DisplayName { get; set; }
         public string Password { get; set; }
+        public string NewPassword { get; set; }
+        public string OtpCode { get; set; }
+        public DateTime? OtpExpired { get; set; }
         public string RefreshToken { get; set; }
-        public long RoleId { get; set; }
+        public long? RoleId { get; set; }
         public long? ImageId { get; set; }
+        public string Token { get; set; }
+        public string Email { get; set; }
         public Image Image { get; set; }
         public Role Role { get; set; }
+        public RefreshTokenObject RefreshTokenObject { get; set; }
+
         public List<ExamHistory> ExamHistories { get; set; }
         
         public bool Equals(AppUser other)

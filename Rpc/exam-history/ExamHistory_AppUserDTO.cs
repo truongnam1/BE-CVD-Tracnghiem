@@ -14,7 +14,7 @@ namespace Tracnghiem.Rpc.exam_history
         public string DisplayName { get; set; }
         public string Password { get; set; }
         public string RefreshToken { get; set; }
-        public long RoleId { get; set; }
+        public long? RoleId { get; set; }
         public long? ImageId { get; set; }
         public ExamHistory_AppUserDTO() {}
         public ExamHistory_AppUserDTO(AppUser AppUser)
