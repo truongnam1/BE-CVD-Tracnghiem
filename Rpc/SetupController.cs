@@ -1,4 +1,4 @@
-using Tracnghiem.Common;
+﻿using Tracnghiem.Common;
 using Tracnghiem.Entities;
 using Tracnghiem.Enums;
 using Tracnghiem.Helpers;
@@ -59,6 +59,7 @@ namespace Tracnghiem.Rpc
             await InitEnums();
             await SendMenu();
             InitAdmin();
+            await InitUserRole();
             return Ok();
         }
 
@@ -85,6 +86,21 @@ namespace Tracnghiem.Rpc
             }
 
             return Ok();
+        }
+        
+        // role mặc định của người dùng khi đăng ký
+        private async Task InitUserRole()
+        {
+            RoleDAO RoleDAO = new RoleDAO();
+            RoleDAO.Code = RoleEnum.UserRole.Code;
+            RoleDAO.Name = RoleEnum.UserRole.Name;
+            RoleDAO.StatusId = 1;
+            RoleDAO.SiteId = SiteEnum.Tracnghiem.Id;
+            RoleDAO.IsDeleted = false;
+
+            DataContext.Role.Add(RoleDAO);
+            await DataContext.SaveChangesAsync();
+
         }
 
         [HttpGet, Route("rpc/tracnghiem/setup/init-enum")]

@@ -1,6 +1,7 @@
 using TrueSight.Common;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
+using TrueSight.PER.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,6 +30,7 @@ namespace Tracnghiem.Services.MAppUser
         Task<List<AppUser>> List(AppUserFilter AppUserFilter);
         Task<AppUser> Get(long Id);
         Task<AppUser> Create(AppUser AppUser);
+        Task<AppUser> UserCreate(AppUser AppUser);
         Task<AppUser> Update(AppUser AppUser);
         Task<AppUser> Delete(AppUser AppUser);
         Task<List<AppUser>> BulkDelete(List<AppUser> AppUsers);
@@ -109,8 +111,8 @@ namespace Tracnghiem.Services.MAppUser
         
         public async Task<AppUser> Create(AppUser AppUser)
         {
-            //if (!await AppUserValidator.Create(AppUser))
-            //    return AppUser;
+            if (!await AppUserValidator.Create(AppUser))
+                return AppUser;
 
             try
             {
@@ -138,6 +140,73 @@ namespace Tracnghiem.Services.MAppUser
             }
             return null;
         }
+
+        public async Task<AppUser> UserCreate(AppUser AppUser)
+        {
+            if (!await AppUserValidator.Create(AppUser))
+                return AppUser;
+
+            try
+            {
+                AppUser.Id = 0;
+                //var Password = GeneratePassword();
+                AppUser.Password = HashPassword(AppUser.Password);
+
+                await UOW.AppUserRepository.Create(AppUser);
+
+                //List<Role> Roles = await UOW.RoleRepository.List(new RoleFilter
+                //{
+                //    Code = new StringFilter
+                //    {
+                //        Equal = RoleEnum.UserRole.Code
+                //    },
+                //    Skip = 0,
+                //    Take = 1,
+                //    Selects = RoleSelect.ALL
+                //});
+                //Role Role = Roles.FirstOrDefault();
+                Role Role = (await UOW.RoleRepository.List(new RoleFilter
+                {
+                    Code = new StringFilter
+                    {
+                        Equal = RoleEnum.UserRole.Code
+                    },
+                    Skip = 0,
+                    Take = 1,
+                    Selects = RoleSelect.Id
+                })).FirstOrDefault();
+
+
+                if (Role == null)
+                    return AppUser;
+                Role = await UOW.RoleRepository.Get(Role.Id);
+                Role.AppUserRoleMappings.Add(new AppUserRoleMapping
+                {
+                    AppUserId = AppUser.Id,
+                    RoleId = Role.Id
+                });
+                await UOW.RoleRepository.Update(Role);
+                AppUser = await Get(AppUser.Id);
+
+
+                //Mail mail = new Mail
+                //{
+                //    Subject = "Create AppUser",
+                //    Body = $"Your account has been created at {StaticParams.DateTimeNow.AddHours(7).ToString("HH:mm:ss dd-MM-yyyy")} Username: {AppUser.Username} Password: {Password}",
+                //    Recipients = new List<string> { AppUser.Email },
+                //    RowId = Guid.NewGuid()
+                //};
+                //RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+                return AppUser;
+            }
+            catch (Exception ex)
+            {
+                Logging.CreateSystemLog(ex, nameof(AppUserService));
+            }
+            return null;
+        }
+
+
 
         public async Task<AppUser> Update(AppUser AppUser)
         {

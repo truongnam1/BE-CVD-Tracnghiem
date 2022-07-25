@@ -10,6 +10,7 @@ using Tracnghiem.Entities;
 using Tracnghiem.Repositories;
 using Tracnghiem.Helpers;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace Tracnghiem.Services.MAppUser
 {
@@ -50,10 +51,11 @@ namespace Tracnghiem.Services.MAppUser
             await ValidateUsername(AppUser);
             await ValidateDisplayName(AppUser);
             await ValidatePassword(AppUser);
-            await ValidateRefreshToken(AppUser);
+            //await ValidateRefreshToken(AppUser);
             await ValidateImage(AppUser);
-            await ValidateRole(AppUser);
-            await ValidateExamHistories(AppUser);
+            await ValidateEmail(AppUser);
+            //await ValidateRole(AppUser);
+            //await ValidateExamHistories(AppUser);
             return AppUser.IsValidated;
         }
 
@@ -64,10 +66,10 @@ namespace Tracnghiem.Services.MAppUser
                 await ValidateUsername(AppUser);
                 await ValidateDisplayName(AppUser);
                 await ValidatePassword(AppUser);
-                await ValidateRefreshToken(AppUser);
+                //await ValidateRefreshToken(AppUser);
                 await ValidateImage(AppUser);
-                await ValidateRole(AppUser);
-                await ValidateExamHistories(AppUser);
+                //await ValidateRole(AppUser);
+                //await ValidateExamHistories(AppUser);
             }
             return AppUser.IsValidated;
         }
@@ -110,15 +112,61 @@ namespace Tracnghiem.Services.MAppUser
                 AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Id), AppUserMessage.Error.IdNotExisted, AppUserMessage);
             return AppUser.IsValidated;
         }
+
+        public async Task<bool> ValidateEmail(AppUser AppUser)
+        {
+            if (string.IsNullOrWhiteSpace(AppUser.Email))
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailEmpty);
+            else if (!IsValidEmail(AppUser.Email))
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailInvalid);
+            else
+            {
+                if (AppUser.Email.Length > 255)
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailOverLength);
+                AppUserFilter AppUserFilter = new AppUserFilter
+                {
+                    Skip = 0,
+                    Take = 10,
+                    Id = new IdFilter { NotEqual = AppUser.Id },
+                    Email = new StringFilter { Equal = AppUser.Email },
+                    Selects = AppUserSelect.Email
+                };
+
+                int count = await UOW.AppUserRepository.CountAll(AppUserFilter);
+                if (count != 0)
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailExisted);
+            }
+            return AppUser.IsValidated;
+        }
+
+
         private async Task<bool> ValidateUsername(AppUser AppUser)
         {
-            if (string.IsNullOrEmpty(AppUser.Username))
+            if (string.IsNullOrWhiteSpace(AppUser.Username))
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameEmpty);
+            else
             {
-                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameEmpty, AppUserMessage);
-            }
-            else if (AppUser.Username.Count() > 500)
-            {
-                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameOverLength, AppUserMessage);
+                var Code = AppUser.Username;
+                if (AppUser.Username.Contains(" ") || !Code.ChangeToEnglishChar().Equals(AppUser.Username))
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameHasSpecialCharacter);
+                }
+                else if (AppUser.Username.Length > 255)
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameOverLength);
+                }
+                AppUserFilter AppUserFilter = new AppUserFilter
+                {
+                    Skip = 0,
+                    Take = 10,
+                    Id = new IdFilter { NotEqual = AppUser.Id },
+                    Username = new StringFilter { Equal = AppUser.Username },
+                    Selects = AppUserSelect.Username
+                };
+
+                int count = await UOW.AppUserRepository.CountAll(AppUserFilter);
+                if (count != 0)
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Username), AppUserMessage.Error.UsernameExisted);
             }
             return AppUser.IsValidated;
         }
@@ -307,6 +355,11 @@ namespace Tracnghiem.Services.MAppUser
         public Task<bool> RefreshToken(AppUser AppUser)
         {
             throw new NotImplementedException();
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            return Regex.Match(email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$").Success;
         }
     }
 }

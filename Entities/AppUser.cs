@@ -68,6 +68,7 @@ namespace Tracnghiem.Entities
         public StringFilter Username { get; set; }
         public StringFilter DisplayName { get; set; }
         public StringFilter Password { get; set; }
+        public StringFilter Email { get; set; }
         public StringFilter RefreshToken { get; set; }
         public IdFilter RoleId { get; set; }
         public IdFilter ImageId { get; set; }
@@ -87,6 +88,7 @@ namespace Tracnghiem.Entities
         RefreshToken = 4,
         Role = 5,
         Image = 6,
+        Email = 7,
     }
 
     [Flags]
@@ -100,6 +102,7 @@ namespace Tracnghiem.Entities
         RefreshToken = E._4,
         Role = E._5,
         Image = E._6,
+        Email = E._7,
     }
 
     [Flags]
@@ -110,5 +113,6 @@ namespace Tracnghiem.Entities
         DisplayName = E._2,
         Password = E._3,
         RefreshToken = E._4,
+        Email = E._5,
     }
 }

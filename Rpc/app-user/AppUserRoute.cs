@@ -32,6 +32,7 @@ namespace Tracnghiem.Rpc.app_user
         public const string List = Default + "/list";
         public const string Get = Default + "/get";
         public const string Create = Default + "/create";
+        public const string UserCreate = Default + "/user-create";
         public const string Update = Default + "/update";
         public const string Delete = Default + "/delete";
         public const string Import = Default + "/import";

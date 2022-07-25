@@ -42,6 +42,7 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.Id, filter.Id);
             query = query.Where(q => q.Username, filter.Username);
             query = query.Where(q => q.DisplayName, filter.DisplayName);
+            query = query.Where(q => q.Email, filter.Email);
             query = query.Where(q => q.Password, filter.Password);
             query = query.Where(q => q.RefreshToken, filter.RefreshToken);
             query = query.Where(q => q.ImageId, filter.ImageId);
@@ -298,6 +299,9 @@ namespace Tracnghiem.Repositories
             AppUserDAO.Password = AppUser.Password;
             AppUserDAO.RefreshToken = AppUser.RefreshToken;
             AppUserDAO.ImageId = AppUser.ImageId;
+            AppUserDAO.CreatedAt = StaticParams.DateTimeNow;
+            AppUserDAO.UpdatedAt = StaticParams.DateTimeNow;
+            AppUserDAO.StatusId = StatusEnum.ACTIVE.Id;
             DataContext.AppUser.Add(AppUserDAO);
             await DataContext.SaveChangesAsync();
             AppUser.Id = AppUserDAO.Id;
@@ -378,26 +382,26 @@ namespace Tracnghiem.Repositories
 
         private async Task SaveReference(AppUser AppUser)
         {
-            await DataContext.ExamHistory
-                .Where(x => x.AppUserId == AppUser.Id)
-                .DeleteFromQueryAsync();
-            if (AppUser.ExamHistories != null)
-            {
-                foreach (ExamHistory ExamHistory in AppUser.ExamHistories)
-                {
-                    ExamHistoryDAO ExamHistoryDAO = new ExamHistoryDAO();
-                    ExamHistoryDAO.Id = ExamHistory.Id;
-                    ExamHistoryDAO.AppUserId = AppUser.Id;
-                    ExamHistoryDAO.ExamId = ExamHistory.ExamId;
-                    ExamHistoryDAO.Times = ExamHistory.Times;
-                    ExamHistoryDAO.CorrectAnswerQuantity = ExamHistory.CorrectAnswerQuantity;
-                    ExamHistoryDAO.TotalQuestionQuantity = ExamHistory.TotalQuestionQuantity;
-                    ExamHistoryDAO.Mark = ExamHistory.Mark;
-                    ExamHistoryDAO.ExamedAt = ExamHistory.ExamedAt;
-                    DataContext.ExamHistory.Add(ExamHistoryDAO);
-                }
-                await DataContext.SaveChangesAsync();
-            }
+            //await DataContext.ExamHistory
+            //    .Where(x => x.AppUserId == AppUser.Id)
+            //    .DeleteFromQueryAsync();
+            //if (AppUser.ExamHistories != null)
+            //{
+            //    foreach (ExamHistory ExamHistory in AppUser.ExamHistories)
+            //    {
+            //        ExamHistoryDAO ExamHistoryDAO = new ExamHistoryDAO();
+            //        ExamHistoryDAO.Id = ExamHistory.Id;
+            //        ExamHistoryDAO.AppUserId = AppUser.Id;
+            //        ExamHistoryDAO.ExamId = ExamHistory.ExamId;
+            //        ExamHistoryDAO.Times = ExamHistory.Times;
+            //        ExamHistoryDAO.CorrectAnswerQuantity = ExamHistory.CorrectAnswerQuantity;
+            //        ExamHistoryDAO.TotalQuestionQuantity = ExamHistory.TotalQuestionQuantity;
+            //        ExamHistoryDAO.Mark = ExamHistory.Mark;
+            //        ExamHistoryDAO.ExamedAt = ExamHistory.ExamedAt;
+            //        DataContext.ExamHistory.Add(ExamHistoryDAO);
+            //    }
+            //    await DataContext.SaveChangesAsync();
+            //}
         }
 
     }

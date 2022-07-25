@@ -8,10 +8,10 @@ namespace Tracnghiem.Enums
 {
     public class RoleEnum
     {
-        public static GenericEnum A1 = new GenericEnum (Id : 1, Code : "", Name : "");
+        public static GenericEnum UserRole = new GenericEnum (Id : 1, Code : "Tracnghiem_User", Name : "Tracnghiem_User");
         public static List<GenericEnum> RoleEnumList = new List<GenericEnum>
         {
-            A1,
+            UserRole
         };
     }
 }
