@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using Tracnghiem.Repositories;
+using Tracnghiem.Entities;
 
 namespace Tracnghiem.Rpc
 {
@@ -42,13 +44,17 @@ namespace Tracnghiem.Rpc
         private ICurrentContext CurrentContext;
         //private DataContext DataContext;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private IUOW UOW;
         public PermissionHandler(
             ICurrentContext CurrentContext, 
-            //DataContext DataContext, 
-            IHttpContextAccessor httpContextAccessor)
+            //DataContext DataContext,
+            IUOW UOW,
+            IHttpContextAccessor httpContextAccessor
+            )
         {
             this.CurrentContext = CurrentContext;
             //this.DataContext = DataContext;
+            this.UOW = UOW;
             this.httpContextAccessor = httpContextAccessor;
         }
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
@@ -70,30 +76,30 @@ namespace Tracnghiem.Rpc
             CurrentContext.TimeZone = int.TryParse(TimeZone, out int t) ? t : 0;
             CurrentContext.Language = Language ?? "vi";
             context.Succeed(requirement);
-            //List<CurrentPermission> CurrentPermissions = await UOW.PermissionRepository.ListByUserAndPath(UserId, url);
+            List<CurrentPermission> CurrentPermissions = await UOW.PermissionRepository.ListByUserAndPath(UserId, url);
 
-            //if (CurrentPermissions.Count == 0)
-            //{
-            //    context.Fail();
-            //    return;
-            //}
-            //CurrentContext.RoleIds = CurrentPermissions.Select(p => p.RoleId).Distinct().ToList();
-            //CurrentContext.Filters = new Dictionary<long, List<FilterPermissionDefinition>>();
-            //foreach (CurrentPermission CurrentPermission in CurrentPermissions)
-            //{
-            //    List<FilterPermissionDefinition> FilterPermissionDefinitions = new List<FilterPermissionDefinition>();
-            //    CurrentContext.Filters.Add(CurrentPermission.Id, FilterPermissionDefinitions);
-            //    foreach (CurrentPermissionContent CurrentPermissionContent in CurrentPermission.CurrentPermissionContents)
-            //    {
-            //        FilterPermissionDefinition FilterPermissionDefinition = FilterPermissionDefinitions.Where(f => f.Name == CurrentPermissionContent.FieldName).FirstOrDefault();
-            //        if (FilterPermissionDefinition == null)
-            //        {
-            //            FilterPermissionDefinition = new FilterPermissionDefinition(CurrentPermissionContent.FieldName);
-            //            FilterPermissionDefinitions.Add(FilterPermissionDefinition);
-            //        }
-            //        FilterPermissionDefinition.SetValue(CurrentPermissionContent.FieldTypeId, CurrentPermissionContent.PermissionOperatorId, CurrentPermissionContent.Value);
-            //    }
-            //}
+            if (CurrentPermissions.Count == 0)
+            {
+                context.Fail();
+                return;
+            }
+            CurrentContext.RoleIds = CurrentPermissions.Select(p => p.RoleId).Distinct().ToList();
+            CurrentContext.Filters = new Dictionary<long, List<FilterPermissionDefinition>>();
+            foreach (CurrentPermission CurrentPermission in CurrentPermissions)
+            {
+                List<FilterPermissionDefinition> FilterPermissionDefinitions = new List<FilterPermissionDefinition>();
+                CurrentContext.Filters.Add(CurrentPermission.Id, FilterPermissionDefinitions);
+                foreach (CurrentPermissionContent CurrentPermissionContent in CurrentPermission.CurrentPermissionContents)
+                {
+                    FilterPermissionDefinition FilterPermissionDefinition = FilterPermissionDefinitions.Where(f => f.Name == CurrentPermissionContent.FieldName).FirstOrDefault();
+                    if (FilterPermissionDefinition == null)
+                    {
+                        FilterPermissionDefinition = new FilterPermissionDefinition(CurrentPermissionContent.FieldName);
+                        FilterPermissionDefinitions.Add(FilterPermissionDefinition);
+                    }
+                    FilterPermissionDefinition.SetValue(CurrentPermissionContent.FieldTypeId, CurrentPermissionContent.PermissionOperatorId, CurrentPermissionContent.Value);
+                }
+            }
             context.Succeed(requirement);
         }
     }

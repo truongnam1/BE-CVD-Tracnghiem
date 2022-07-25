@@ -86,7 +86,6 @@ namespace Tracnghiem.Rpc.app_user
             return new AppUser_AppUserDTO(AppUser);
         }
 
-        [AllowAnonymous]
         [Route(AppUserRoute.Create), HttpPost]
         public async Task<ActionResult<AppUser_AppUserDTO>> Create([FromBody] AppUser_AppUserDTO AppUser_AppUserDTO)
         {
@@ -98,6 +97,25 @@ namespace Tracnghiem.Rpc.app_user
 
             AppUser AppUser = ConvertDTOToEntity(AppUser_AppUserDTO);
             AppUser = await AppUserService.Create(AppUser);
+            AppUser_AppUserDTO = new AppUser_AppUserDTO(AppUser);
+            if (AppUser.IsValidated)
+                return AppUser_AppUserDTO;
+            else
+                return BadRequest(AppUser_AppUserDTO);
+        }
+
+        [AllowAnonymous]
+        [Route(AppUserRoute.UserCreate), HttpPost]
+        public async Task<ActionResult<AppUser_AppUserDTO>> UserCreate([FromBody] AppUser_AppUserDTO AppUser_AppUserDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            if (!await HasPermission(AppUser_AppUserDTO.Id))
+                return Forbid();
+
+            AppUser AppUser = ConvertDTOToEntity(AppUser_AppUserDTO);
+            AppUser = await AppUserService.UserCreate(AppUser);
             AppUser_AppUserDTO = new AppUser_AppUserDTO(AppUser);
             if (AppUser.IsValidated)
                 return AppUser_AppUserDTO;
