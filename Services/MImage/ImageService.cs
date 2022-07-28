@@ -10,6 +10,10 @@ using OfficeOpenXml;
 using Tracnghiem.Repositories;
 using Tracnghiem.Entities;
 using Tracnghiem.Enums;
+using Microsoft.AspNetCore.Http;
+using RestSharp;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Tracnghiem.Services.MImage
 {
@@ -18,11 +22,7 @@ namespace Tracnghiem.Services.MImage
         Task<int> Count(ImageFilter ImageFilter);
         Task<List<Image>> List(ImageFilter ImageFilter);
         Task<Image> Get(long Id);
-        Task<Image> Create(Image Image);
-        Task<Image> Update(Image Image);
-        Task<Image> Delete(Image Image);
-        Task<List<Image>> BulkDelete(List<Image> Images);
-        Task<List<Image>> BulkMerge(List<Image> Images);
+        Task<Image> Create(IFormFile file);
         Task<ImageFilter> ToFilter(ImageFilter ImageFilter);
     }
 
@@ -31,8 +31,9 @@ namespace Tracnghiem.Services.MImage
         private IUOW UOW;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
-        
         private IImageValidator ImageValidator;
+
+        private string APIKey = "ba4b149d644934850a218ea3aa6ede0b";
 
         public ImageService(
             IUOW UOW,
@@ -85,95 +86,66 @@ namespace Tracnghiem.Services.MImage
             return Image;
         }
         
-        public async Task<Image> Create(Image Image)
+        public async Task<Image> Create(IFormFile file)
         {
-            if (!await ImageValidator.Create(Image))
-                return Image;
+            //if (!await ImageValidator.Create(Image))
+            //    return Image;
+
+            if (file.Length < 0)
+                return null;
+                var ms = new MemoryStream();
+                file.CopyTo(ms);
+                byte[] fileBytes = ms.ToArray();
+                //string s = Convert.ToBase64String(fileBytes);
+                    // act on the Base64 data
+                
+            string url = "/1/upload";
+            // save original File
+            RestClient restClient = new RestClient(ServiceEnum.IMGBB);
+            RestRequest restRequest = new RestRequest(url);
+            restRequest.RequestFormat = DataFormat.Json;
+            restRequest.Method = Method.POST;
+            restRequest.AddHeader("Content-Type", "multipart/form-data");
+            restRequest.AddQueryParameter("key", APIKey);
+            restRequest.AddFile("image", fileBytes, file.FileName);
+
+            //try
+            //{
+            //    await UOW.ImageRepository.Create(Image);
+            //    Image = await UOW.ImageRepository.Get(Image.Id);
+            //    return Image;
+            //}
+            //catch (Exception ex)
+            //{
+            //    Logging.CreateSystemLog(ex, nameof(ImageService));
+            //}
+
 
             try
             {
-                await UOW.ImageRepository.Create(Image);
-                Image = await UOW.ImageRepository.Get(Image.Id);
-                return Image;
+                var response = restClient.Execute<string>(restRequest);
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    JObject json = JObject.Parse(response.Data);
+                    Image Image = new Image();
+                    Image.Id = 0;
+                    Image.Name = json["data"]["title"].ToString();
+                    Image.Url = json["data"]["url"].ToString();
+                    Image.RowId = Guid.NewGuid();
+                    Image = await UOW.ImageRepository.Create(Image);
+
+                    return Image;
+                }
+
+                return new Image();
             }
-            catch (Exception ex)
+            catch
             {
-                Logging.CreateSystemLog(ex, nameof(ImageService));
+
             }
             return null;
         }
 
-        public async Task<Image> Update(Image Image)
-        {
-            if (!await ImageValidator.Update(Image))
-                return Image;
-            try
-            {
-                var oldData = await UOW.ImageRepository.Get(Image.Id);
-
-                await UOW.ImageRepository.Update(Image);
-
-                Image = await UOW.ImageRepository.Get(Image.Id);
-                return Image;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ImageService));
-            }
-            return null;
-        }
-
-        public async Task<Image> Delete(Image Image)
-        {
-            if (!await ImageValidator.Delete(Image))
-                return Image;
-
-            try
-            {
-                await UOW.ImageRepository.Delete(Image);
-                return Image;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ImageService));
-            }
-            return null;
-        }
-
-        public async Task<List<Image>> BulkDelete(List<Image> Images)
-        {
-            if (!await ImageValidator.BulkDelete(Images))
-                return Images;
-
-            try
-            {
-                await UOW.ImageRepository.BulkDelete(Images);
-                return Images;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ImageService));
-            }
-            return null;
-        }
-
-        public async Task<List<Image>> BulkMerge(List<Image> Images)
-        {
-            if (!await ImageValidator.Import(Images))
-                return Images;
-            try
-            {
-                var Ids = await UOW.ImageRepository.BulkMerge(Images);
-                Images = await UOW.ImageRepository.List(Ids);
-                return Images;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ImageService));
-            }
-            return null;
-        }     
-        
         public async Task<ImageFilter> ToFilter(ImageFilter filter)
         {
             if (filter.OrFilter == null) filter.OrFilter = new List<ImageFilter>();

@@ -28,12 +28,12 @@ namespace Tracnghiem.Rpc.image
         public const string List = Default + "/list";
         public const string Get = Default + "/get";
         public const string Create = Default + "/create";
-        public const string Update = Default + "/update";
+        //public const string Update = Default + "/update";
         public const string Delete = Default + "/delete";
-        public const string Import = Default + "/import";
-        public const string Export = Default + "/export";
-        public const string ExportTemplate = Default + "/export-template";
-        public const string BulkDelete = Default + "/bulk-delete";
+        //public const string Import = Default + "/import";
+        //public const string Export = Default + "/export";
+        //public const string ExportTemplate = Default + "/export-template";
+        //public const string BulkDelete = Default + "/bulk-delete";
         
 
 
@@ -68,42 +68,7 @@ namespace Tracnghiem.Rpc.image
                     Master, Preview, Count, List, Get,
                     Detail, Create, 
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
-            },
-
-            { "Sửa", new List<string> { 
-                    Parent,            
-                    Master, Preview, Count, List, Get,
-                    Detail, Update, 
-                }.Concat(SingleList).Concat(FilterList).Concat(CountList)
-            },
-
-            { "Xoá", new List<string> { 
-                    Parent,
-                    Master, Preview, Count, List, Get,
-                    Delete, 
-                }.Concat(SingleList).Concat(FilterList) 
-            },
-
-            { "Xoá nhiều", new List<string> { 
-                    Parent,
-                    Master, Preview, Count, List, Get,
-                    BulkDelete 
-                }.Concat(FilterList) 
-            },
-
-            { "Xuất excel", new List<string> { 
-                    Parent,
-                    Master, Preview, Count, List, Get,
-                    Export 
-                }.Concat(FilterList) 
-            },
-
-            { "Nhập excel", new List<string> { 
-                    Parent,
-                    Master, Preview, Count, List, Get,
-                    ExportTemplate, Import 
-                }.Concat(FilterList) 
-            },
+            }
         };
     }
 }

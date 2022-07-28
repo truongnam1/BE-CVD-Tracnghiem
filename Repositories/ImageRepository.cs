@@ -21,11 +21,7 @@ namespace Tracnghiem.Repositories
         Task<List<Image>> List(ImageFilter ImageFilter);
         Task<List<Image>> List(List<long> Ids);
         Task<Image> Get(long Id);
-        Task<bool> Create(Image Image);
-        Task<bool> Update(Image Image);
-        Task<bool> Delete(Image Image);
-        Task<List<long>> BulkMerge(List<Image> Images);
-        Task<bool> BulkDelete(List<Image> Images);
+        Task<Image> Create(Image Image);
     }
     public class ImageRepository : IImageRepository
     {
@@ -178,7 +174,7 @@ namespace Tracnghiem.Repositories
 
             return Image;
         }
-        public async Task<bool> Create(Image Image)
+        public async Task<Image> Create(Image Image)
         {
             ImageDAO ImageDAO = new ImageDAO();
             ImageDAO.Id = Image.Id;
@@ -189,75 +185,7 @@ namespace Tracnghiem.Repositories
             await DataContext.SaveChangesAsync();
             Image.Id = ImageDAO.Id;
             await SaveReference(Image);
-            return true;
-        }
-
-        public async Task<bool> Update(Image Image)
-        {
-            ImageDAO ImageDAO = DataContext.Image
-                .Where(x => x.Id == Image.Id)
-                .FirstOrDefault();
-            if (ImageDAO == null)
-                return false;
-            ImageDAO.Id = Image.Id;
-            ImageDAO.Name = Image.Name;
-            ImageDAO.Url = Image.Url;
-            await DataContext.SaveChangesAsync();
-            await SaveReference(Image);
-            return true;
-        }
-
-        public async Task<bool> Delete(Image Image)
-        {
-            await DataContext.Image
-                .Where(x => x.Id == Image.Id)
-                .DeleteFromQueryAsync();
-            return true;
-        }
-
-        public async Task<List<long>> BulkMerge(List<Image> Images)
-        {
-            IdFilter IdFilter = new IdFilter { In = Images.Select(x => x.Id).ToList() };
-            List<ImageDAO> Inserts = new List<ImageDAO>();
-            List<ImageDAO> Updates = new List<ImageDAO>();
-            List<ImageDAO> DbImageDAOs = await DataContext.Image
-                .Where(x => x.Id, IdFilter)
-                .ToListAsync();
-            foreach (Image Image in Images)
-            {
-                ImageDAO ImageDAO = DbImageDAOs
-                        .Where(x => x.Id == Image.Id)
-                        .FirstOrDefault();
-                if (ImageDAO == null)
-                {
-                    ImageDAO = new ImageDAO();
-                    ImageDAO.RowId = Guid.NewGuid();
-                    ImageDAO.Id = Image.Id;
-                    Image.RowId = ImageDAO.RowId;
-                    Inserts.Add(ImageDAO);
-                }
-                else
-                {
-                    Updates.Add(ImageDAO);
-                }
-                ImageDAO.Name = Image.Name;
-                ImageDAO.Url = Image.Url;
-            }
-            await DataContext.Image.BulkInsertAsync(Inserts);
-            await DataContext.Image.BulkMergeAsync(Updates);
-            var Ids = Inserts.Select(x => x.Id).ToList();
-            Ids.AddRange(Updates.Select(x => x.Id));
-            Ids = Ids.Distinct().ToList();
-            return Ids;
-        }
-        
-        public async Task<bool> BulkDelete(List<Image> Images)
-        {
-            List<long> Ids = Images.Select(x => x.Id).ToList();
-            await DataContext.Image
-                .WhereBulkContains(Ids, x => x.Id)
-                .DeleteFromQueryAsync();
-            return true;
+            return Image;
         }
 
         private async Task SaveReference(Image Image)

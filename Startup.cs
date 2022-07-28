@@ -35,6 +35,7 @@ using Tracnghiem.Models;
 using Tracnghiem.Rpc;
 using Tracnghiem.Services;
 using Tracnghiem.Repositories;
+using Tracnghiem.Enums;
 
 namespace Tracnghiem
 {
@@ -193,6 +194,7 @@ namespace Tracnghiem
 
             Action onChange = () =>
             {
+                ServiceEnum.IMGBB = Configuration["Services:IMGBB"];
                 JobStorage.Current = new SqlServerStorage(Configuration.GetConnectionString("DataContext"));
                 using (var connection = JobStorage.Current.GetConnection())
                 {

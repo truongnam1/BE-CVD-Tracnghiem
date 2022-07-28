@@ -70,185 +70,26 @@ namespace Tracnghiem.Rpc.image
             return new Image_ImageDTO(Image);
         }
 
+        [AllowAnonymous]
         [Route(ImageRoute.Create), HttpPost]
-        public async Task<ActionResult<Image_ImageDTO>> Create([FromBody] Image_ImageDTO Image_ImageDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            if (!await HasPermission(Image_ImageDTO.Id))
-                return Forbid();
-
-            Image Image = ConvertDTOToEntity(Image_ImageDTO);
-            Image = await ImageService.Create(Image);
-            Image_ImageDTO = new Image_ImageDTO(Image);
-            if (Image.IsValidated)
-                return Image_ImageDTO;
-            else
-                return BadRequest(Image_ImageDTO);
-        }
-
-        [Route(ImageRoute.Update), HttpPost]
-        public async Task<ActionResult<Image_ImageDTO>> Update([FromBody] Image_ImageDTO Image_ImageDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            if (!await HasPermission(Image_ImageDTO.Id))
-                return Forbid();
-
-            Image Image = ConvertDTOToEntity(Image_ImageDTO);
-            Image = await ImageService.Update(Image);
-            Image_ImageDTO = new Image_ImageDTO(Image);
-            if (Image.IsValidated)
-                return Image_ImageDTO;
-            else
-                return BadRequest(Image_ImageDTO);
-        }
-
-        [Route(ImageRoute.Delete), HttpPost]
-        public async Task<ActionResult<Image_ImageDTO>> Delete([FromBody] Image_ImageDTO Image_ImageDTO)
+        public async Task<ActionResult<Image_ImageDTO>> Create(IFormFile file)
         {
             if (!ModelState.IsValid)
                 throw new BindException(ModelState);
 
-            if (!await HasPermission(Image_ImageDTO.Id))
-                return Forbid();
+            //if (!await HasPermission(Image_ImageDTO.Id))
+            //    return Forbid();
 
-            Image Image = ConvertDTOToEntity(Image_ImageDTO);
-            Image = await ImageService.Delete(Image);
-            Image_ImageDTO = new Image_ImageDTO(Image);
-            if (Image.IsValidated)
-                return Image_ImageDTO;
-            else
-                return BadRequest(Image_ImageDTO);
+            //Image Image = ConvertDTOToEntity(Image_ImageDTO);
+            Image Image = await ImageService.Create(file);
+            //Image_ImageDTO = new Image_ImageDTO(Image);
+            //if (Image.IsValidated)
+            //    return Image_ImageDTO;
+            //else
+            //    return BadRequest(Image_ImageDTO);
+
+            return new Image_ImageDTO(Image);
         }
-        
-        [Route(ImageRoute.BulkDelete), HttpPost]
-        public async Task<ActionResult<bool>> BulkDelete([FromBody] List<long> Ids)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-
-            ImageFilter ImageFilter = new ImageFilter();
-            ImageFilter = await ImageService.ToFilter(ImageFilter);
-            ImageFilter.Id = new IdFilter { In = Ids };
-            ImageFilter.Selects = ImageSelect.Id;
-            ImageFilter.Skip = 0;
-            ImageFilter.Take = int.MaxValue;
-
-            List<Image> Images = await ImageService.List(ImageFilter);
-            Images = await ImageService.BulkDelete(Images);
-            if (Images.Any(x => !x.IsValidated))
-                return BadRequest(Images.Where(x => !x.IsValidated));
-            return true;
-        }
-        
-        [Route(ImageRoute.Import), HttpPost]
-        public async Task<ActionResult> Import(IFormFile file)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            List<Image> Images = new List<Image>();
-            using (ExcelPackage excelPackage = new ExcelPackage(file.OpenReadStream()))
-            {
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                if (worksheet == null)
-                    return Ok(Images);
-                int StartColumn = 1;
-                int StartRow = 2;
-                int IdColumn = 0 + StartColumn;
-                int NameColumn = 1 + StartColumn;
-                int UrlColumn = 2 + StartColumn;
-
-                for (int i = StartRow; i <= worksheet.Dimension.End.Row; i++)
-                {
-                    if (string.IsNullOrEmpty(worksheet.Cells[i, StartColumn].Value?.ToString()))
-                        break;
-                    string IdValue = worksheet.Cells[i, IdColumn].Value?.ToString();
-                    string NameValue = worksheet.Cells[i, NameColumn].Value?.ToString();
-                    string UrlValue = worksheet.Cells[i, UrlColumn].Value?.ToString();
-                    
-                    Image Image = new Image();
-                    Image.Name = NameValue;
-                    Image.Url = UrlValue;
-                    
-                    Images.Add(Image);
-                }
-            }
-            Images = await ImageService.BulkMerge(Images);
-            if (Images.All(x => x.IsValidated))
-                return Ok(true);
-            else
-            {
-                List<string> Errors = new List<string>();
-                for (int i = 0; i < Images.Count; i++)
-                {
-                    Image Image = Images[i];
-                    if (!Image.IsValidated)
-                    {
-                        string Error = $"Dòng {i + 2} có lỗi:";
-                        if (Image.Errors.ContainsKey(nameof(Image.Id).Camelize()))
-                            Error += Image.Errors[nameof(Image.Id).Camelize()];
-                        if (Image.Errors.ContainsKey(nameof(Image.Name).Camelize()))
-                            Error += Image.Errors[nameof(Image.Name).Camelize()];
-                        if (Image.Errors.ContainsKey(nameof(Image.Url).Camelize()))
-                            Error += Image.Errors[nameof(Image.Url).Camelize()];
-                        Errors.Add(Error);
-                    }
-                }
-                return BadRequest(Errors);
-            }
-        }
-        
-        [Route(ImageRoute.Export), HttpPost]
-        public async Task<ActionResult> Export([FromBody] Image_ImageFilterDTO Image_ImageFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            var ImageFilter = ConvertFilterDTOToFilterEntity(Image_ImageFilterDTO);
-            ImageFilter.Skip = 0;
-            ImageFilter.Take = int.MaxValue;
-            ImageFilter = await ImageService.ToFilter(ImageFilter);
-            List<Image> Images = await ImageService.List(ImageFilter);
-            List<Image_ImageExportDTO> Image_ImageExportDTOs = Images.Select(x => new Image_ImageExportDTO(x)).ToList();  
-            var STT = 1;
-            foreach (var Image_ImageExportDTO in Image_ImageExportDTOs)
-            {
-                Image_ImageExportDTO.STT = STT++;
-            }
-            string path = "Templates/Image_Export.xlsx";
-            byte[] arr = System.IO.File.ReadAllBytes(path);
-            MemoryStream input = new MemoryStream(arr);
-            MemoryStream output = new MemoryStream();
-            dynamic Data = new ExpandoObject();            
-            Data.Data = Image_ImageExportDTOs;
-            using (var document = StaticParams.DocumentFactory.Open(input, output, "xlsx"))
-            {    
-                document.Process(Data);
-            }
-            return File(output.ToArray(), "application/octet-stream", "Image.xlsx");
-        }
-
-        [Route(ImageRoute.ExportTemplate), HttpPost]
-        public async Task<ActionResult> ExportTemplate([FromBody] Image_ImageFilterDTO Image_ImageFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            string path = "Templates/Image_Template.xlsx";
-            byte[] arr = System.IO.File.ReadAllBytes(path);
-            MemoryStream input = new MemoryStream(arr);
-            MemoryStream output = new MemoryStream();
-            dynamic Data = new ExpandoObject();
-            using (var document = StaticParams.DocumentFactory.Open(input, output, "xlsx"))
-            {
-                document.Process(Data);
-            };
-            return File(output.ToArray(), "application/octet-stream", "Image.xlsx");
-        }
-
         private async Task<bool> HasPermission(long Id)
         {
             ImageFilter ImageFilter = new ImageFilter();

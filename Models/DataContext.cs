@@ -385,8 +385,6 @@ namespace Tracnghiem.Models
 
             modelBuilder.Entity<ImageDAO>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(4000);
