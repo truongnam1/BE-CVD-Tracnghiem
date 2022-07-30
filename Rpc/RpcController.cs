@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using Tracnghiem.Repositories;
 using Tracnghiem.Entities;
+using Tracnghiem.Enums;
 
 namespace Tracnghiem.Rpc
 {

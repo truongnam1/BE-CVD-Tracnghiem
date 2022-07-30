@@ -92,8 +92,14 @@ namespace Tracnghiem.Services.MQuestion
 
             try
             {
+                Question.Code = string.Empty;
+                Question.CreatorId = CurrentContext.UserId;
                 await UOW.QuestionRepository.Create(Question);
                 Question = await UOW.QuestionRepository.Get(Question.Id);
+                Question.Code = $"Q_{Question.Id}";
+
+                await UOW.QuestionRepository.Update(Question);
+
                 return Question;
             }
             catch (Exception ex)

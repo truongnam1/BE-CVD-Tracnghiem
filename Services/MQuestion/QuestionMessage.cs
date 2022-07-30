@@ -42,6 +42,8 @@ namespace Tracnghiem.Services.MQuestion
             SubjectNotExisted,
             QuestionContent_AnswerContentEmpty,
             QuestionContent_AnswerContentOverLength,
+            QuestionContent_OverCorectAnswers,
+            QuestionContent_NotCorectAnswers
         }
     }
 }

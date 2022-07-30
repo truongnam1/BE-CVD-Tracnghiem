@@ -492,7 +492,7 @@ namespace Tracnghiem.Repositories
                 .WhereBulkContains(Ids, x => x.Id)
                 .UpdateFromQueryAsync(x => new QuestionDAO 
                 { 
-                    DeletedAt = StaticParams.DateTimeNow, 
+                    DeletedAt = StaticParams.DateTimeNow,
                     UpdatedAt = StaticParams.DateTimeNow 
                 });
             return true;
@@ -505,6 +505,7 @@ namespace Tracnghiem.Repositories
                 .DeleteFromQueryAsync();
             if (Question.QuestionContents != null)
             {
+                List<QuestionContentDAO> QuestionContentDAOs = new List<QuestionContentDAO>();
                 foreach (QuestionContent QuestionContent in Question.QuestionContents)
                 {
                     QuestionContentDAO QuestionContentDAO = new QuestionContentDAO();
@@ -512,9 +513,9 @@ namespace Tracnghiem.Repositories
                     QuestionContentDAO.QuestionId = Question.Id;
                     QuestionContentDAO.AnswerContent = QuestionContent.AnswerContent;
                     QuestionContentDAO.IsRight = QuestionContent.IsRight;
-                    DataContext.QuestionContent.Add(QuestionContentDAO);
+                    QuestionContentDAOs.Add(QuestionContentDAO);
                 }
-                await DataContext.SaveChangesAsync();
+                await DataContext.BulkMergeAsync(QuestionContentDAOs);
             }
         }
 

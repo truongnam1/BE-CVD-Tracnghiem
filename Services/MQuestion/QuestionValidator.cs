@@ -41,7 +41,7 @@ namespace Tracnghiem.Services.MQuestion
 
         public async Task<bool> Create(Question Question)
         {
-            await ValidateCode(Question);
+            //await ValidateCode(Question);
             await ValidateName(Question);
             await ValidateContent(Question);
             await ValidateGrade(Question);
@@ -57,7 +57,7 @@ namespace Tracnghiem.Services.MQuestion
         {
             if (await ValidateId(Question))
             {
-                await ValidateCode(Question);
+                //await ValidateCode(Question);
                 await ValidateName(Question);
                 await ValidateContent(Question);
                 await ValidateGrade(Question);
@@ -82,7 +82,7 @@ namespace Tracnghiem.Services.MQuestion
             }
             return Question.IsValidated;
         }
-        
+
         public async Task<bool> BulkDelete(List<Question> Questions)
         {
             return Questions.All(x => x.IsValidated);
@@ -92,7 +92,7 @@ namespace Tracnghiem.Services.MQuestion
         {
             return true;
         }
-        
+
         private async Task<bool> ValidateId(Question Question)
         {
             QuestionFilter QuestionFilter = new QuestionFilter
@@ -108,8 +108,8 @@ namespace Tracnghiem.Services.MQuestion
                 Question.AddError(nameof(QuestionValidator), nameof(Question.Id), QuestionMessage.Error.IdNotExisted, QuestionMessage);
             return Question.IsValidated;
         }
-         private async Task<bool> ValidateCode(Question Question)
-         {
+        private async Task<bool> ValidateCode(Question Question)
+        {
             if (string.IsNullOrEmpty(Question.Code))
             {
                 Question.AddError(nameof(QuestionValidator), nameof(Question.Code), QuestionMessage.Error.CodeEmpty, QuestionMessage);
@@ -165,14 +165,14 @@ namespace Tracnghiem.Services.MQuestion
             return Question.IsValidated;
         }
         private async Task<bool> ValidateGrade(Question Question)
-        {       
-            if(Question.GradeId == 0)
+        {
+            if (Question.GradeId == 0)
             {
                 Question.AddError(nameof(QuestionValidator), nameof(Question.Grade), QuestionMessage.Error.GradeEmpty, QuestionMessage);
             }
             else
             {
-                if(!GradeEnum.GradeEnumList.Any(x => Question.GradeId == x.Id))
+                if (!GradeEnum.GradeEnumList.Any(x => Question.GradeId == x.Id))
                 {
                     Question.AddError(nameof(QuestionValidator), nameof(Question.Grade), QuestionMessage.Error.GradeNotExisted, QuestionMessage);
                 }
@@ -180,14 +180,14 @@ namespace Tracnghiem.Services.MQuestion
             return true;
         }
         private async Task<bool> ValidateQuestionGroup(Question Question)
-        {       
-            if(Question.QuestionGroupId == 0)
+        {
+            if (Question.QuestionGroupId == 0)
             {
                 Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionGroup), QuestionMessage.Error.QuestionGroupEmpty, QuestionMessage);
             }
             else
             {
-                if(!QuestionGroupEnum.QuestionGroupEnumList.Any(x => Question.QuestionGroupId == x.Id))
+                if (!QuestionGroupEnum.QuestionGroupEnumList.Any(x => Question.QuestionGroupId == x.Id))
                 {
                     Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionGroup), QuestionMessage.Error.QuestionGroupNotExisted, QuestionMessage);
                 }
@@ -195,14 +195,14 @@ namespace Tracnghiem.Services.MQuestion
             return true;
         }
         private async Task<bool> ValidateQuestionType(Question Question)
-        {       
-            if(Question.QuestionTypeId == 0)
+        {
+            if (Question.QuestionTypeId == 0)
             {
                 Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionType), QuestionMessage.Error.QuestionTypeEmpty, QuestionMessage);
             }
             else
             {
-                if(!QuestionTypeEnum.QuestionTypeEnumList.Any(x => Question.QuestionTypeId == x.Id))
+                if (!QuestionTypeEnum.QuestionTypeEnumList.Any(x => Question.QuestionTypeId == x.Id))
                 {
                     Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionType), QuestionMessage.Error.QuestionTypeNotExisted, QuestionMessage);
                 }
@@ -210,14 +210,14 @@ namespace Tracnghiem.Services.MQuestion
             return true;
         }
         private async Task<bool> ValidateStatus(Question Question)
-        {       
-            if(Question.StatusId == 0)
+        {
+            if (Question.StatusId == 0)
             {
                 Question.AddError(nameof(QuestionValidator), nameof(Question.Status), QuestionMessage.Error.StatusEmpty, QuestionMessage);
             }
             else
             {
-                if(!StatusEnum.StatusEnumList.Any(x => Question.StatusId == x.Id))
+                if (!StatusEnum.StatusEnumList.Any(x => Question.StatusId == x.Id))
                 {
                     Question.AddError(nameof(QuestionValidator), nameof(Question.Status), QuestionMessage.Error.StatusNotExisted, QuestionMessage);
                 }
@@ -225,14 +225,14 @@ namespace Tracnghiem.Services.MQuestion
             return true;
         }
         private async Task<bool> ValidateSubject(Question Question)
-        {       
-            if(Question.SubjectId == 0)
+        {
+            if (Question.SubjectId == 0)
             {
                 Question.AddError(nameof(QuestionValidator), nameof(Question.Subject), QuestionMessage.Error.SubjectEmpty, QuestionMessage);
             }
             else
             {
-                if(!SubjectEnum.SubjectEnumList.Any(x => Question.SubjectId == x.Id))
+                if (!SubjectEnum.SubjectEnumList.Any(x => Question.SubjectId == x.Id))
                 {
                     Question.AddError(nameof(QuestionValidator), nameof(Question.Subject), QuestionMessage.Error.SubjectNotExisted, QuestionMessage);
                 }
@@ -240,30 +240,49 @@ namespace Tracnghiem.Services.MQuestion
             return true;
         }
         private async Task<bool> ValidateQuestionContents(Question Question)
-        {   
-            if(Question.QuestionContents?.Any() ?? false)
+        {
+            if (Question.QuestionContents != null && Question.QuestionContents.Count() > 0)
             {
-                #region fetch data
-                #endregion
+                int count = Question.QuestionContents.Where(x => x.IsRight == true).Count();
 
-                #region validate
-                foreach(QuestionContent QuestionContent in Question.QuestionContents)
+                foreach (QuestionContent QuestionContent in Question.QuestionContents)
                 {
-                    if(string.IsNullOrEmpty(QuestionContent.AnswerContent))
+                    if (string.IsNullOrEmpty(QuestionContent.AnswerContent))
                     {
                         QuestionContent.AddError(nameof(QuestionValidator), nameof(QuestionContent.AnswerContent), QuestionMessage.Error.QuestionContent_AnswerContentEmpty, QuestionMessage);
                     }
-                    else if(QuestionContent.AnswerContent.Count() > 500)
+                    else if (QuestionContent.AnswerContent.Count() > 500)
                     {
                         QuestionContent.AddError(nameof(QuestionValidator), nameof(QuestionContent.AnswerContent), QuestionMessage.Error.QuestionContent_AnswerContentOverLength, QuestionMessage);
                     }
 
                 }
-                #endregion
-            }
-            else 
-            {
 
+                if (QuestionTypeEnum.ChooseOneAnswer.Id == Question.QuestionTypeId)
+                {
+                    if (count > 1)
+                    {
+                        Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionContents), QuestionMessage.Error.QuestionContent_OverCorectAnswers, QuestionMessage);
+                    }
+                    else if (count == 0)
+                    {
+                        Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionContents), QuestionMessage.Error.QuestionContent_NotCorectAnswers, QuestionMessage);
+                    }
+                }
+                else if (QuestionTypeEnum.ChooseMultipleAnswer.Id == Question.QuestionTypeId)
+                {
+                    if (count == 0)
+                    {
+                        Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionContents), QuestionMessage.Error.QuestionContent_NotCorectAnswers, QuestionMessage);
+                    }
+                }
+                else if (QuestionTypeEnum.FillAnswer.Id == Question.QuestionTypeId)
+                {
+                    if (count == 0)
+                    {
+                        Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionContents), QuestionMessage.Error.QuestionContent_NotCorectAnswers, QuestionMessage);
+                    }
+                }
             }
             return true;
         }
