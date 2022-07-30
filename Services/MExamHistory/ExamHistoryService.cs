@@ -18,11 +18,6 @@ namespace Tracnghiem.Services.MExamHistory
         Task<int> Count(ExamHistoryFilter ExamHistoryFilter);
         Task<List<ExamHistory>> List(ExamHistoryFilter ExamHistoryFilter);
         Task<ExamHistory> Get(long Id);
-        Task<ExamHistory> Create(ExamHistory ExamHistory);
-        Task<ExamHistory> Update(ExamHistory ExamHistory);
-        Task<ExamHistory> Delete(ExamHistory ExamHistory);
-        Task<List<ExamHistory>> BulkDelete(List<ExamHistory> ExamHistories);
-        Task<List<ExamHistory>> BulkMerge(List<ExamHistory> ExamHistories);
         Task<ExamHistoryFilter> ToFilter(ExamHistoryFilter ExamHistoryFilter);
     }
 
@@ -83,96 +78,7 @@ namespace Tracnghiem.Services.MExamHistory
                 return null;
             await ExamHistoryValidator.Get(ExamHistory);
             return ExamHistory;
-        }
-        
-        public async Task<ExamHistory> Create(ExamHistory ExamHistory)
-        {
-            if (!await ExamHistoryValidator.Create(ExamHistory))
-                return ExamHistory;
-
-            try
-            {
-                await UOW.ExamHistoryRepository.Create(ExamHistory);
-                ExamHistory = await UOW.ExamHistoryRepository.Get(ExamHistory.Id);
-                return ExamHistory;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ExamHistoryService));
-            }
-            return null;
-        }
-
-        public async Task<ExamHistory> Update(ExamHistory ExamHistory)
-        {
-            if (!await ExamHistoryValidator.Update(ExamHistory))
-                return ExamHistory;
-            try
-            {
-                var oldData = await UOW.ExamHistoryRepository.Get(ExamHistory.Id);
-
-                await UOW.ExamHistoryRepository.Update(ExamHistory);
-
-                ExamHistory = await UOW.ExamHistoryRepository.Get(ExamHistory.Id);
-                return ExamHistory;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ExamHistoryService));
-            }
-            return null;
-        }
-
-        public async Task<ExamHistory> Delete(ExamHistory ExamHistory)
-        {
-            if (!await ExamHistoryValidator.Delete(ExamHistory))
-                return ExamHistory;
-
-            try
-            {
-                await UOW.ExamHistoryRepository.Delete(ExamHistory);
-                return ExamHistory;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ExamHistoryService));
-            }
-            return null;
-        }
-
-        public async Task<List<ExamHistory>> BulkDelete(List<ExamHistory> ExamHistories)
-        {
-            if (!await ExamHistoryValidator.BulkDelete(ExamHistories))
-                return ExamHistories;
-
-            try
-            {
-                await UOW.ExamHistoryRepository.BulkDelete(ExamHistories);
-                return ExamHistories;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ExamHistoryService));
-            }
-            return null;
-        }
-
-        public async Task<List<ExamHistory>> BulkMerge(List<ExamHistory> ExamHistories)
-        {
-            if (!await ExamHistoryValidator.Import(ExamHistories))
-                return ExamHistories;
-            try
-            {
-                var Ids = await UOW.ExamHistoryRepository.BulkMerge(ExamHistories);
-                ExamHistories = await UOW.ExamHistoryRepository.List(Ids);
-                return ExamHistories;
-            }
-            catch (Exception ex)
-            {
-                Logging.CreateSystemLog(ex, nameof(ExamHistoryService));
-            }
-            return null;
-        }     
+        }       
         
         public async Task<ExamHistoryFilter> ToFilter(ExamHistoryFilter filter)
         {
