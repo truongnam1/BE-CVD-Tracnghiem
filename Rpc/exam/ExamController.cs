@@ -120,6 +120,25 @@ namespace Tracnghiem.Rpc.exam
                 return BadRequest(Exam_ExamDTO);
         }
 
+        [Route(ExamRoute.Send), HttpPost]
+
+        public async Task<ActionResult<Exam_ExamDTO>> Send([FromBody] Exam_ExamDTO Exam_ExamDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            if (!await HasPermission(Exam_ExamDTO.Id))
+                return Forbid();
+
+            Exam Exam = ConvertDTOToEntity(Exam_ExamDTO);
+            Exam = await ExamService.Send(Exam);
+            Exam_ExamDTO = new Exam_ExamDTO(Exam);
+            if (Exam.IsValidated)
+                return Exam_ExamDTO;
+            else
+                return BadRequest(Exam_ExamDTO);
+        }
+
         [Route(ExamRoute.Update), HttpPost]
         public async Task<ActionResult<Exam_ExamDTO>> Update([FromBody] Exam_ExamDTO Exam_ExamDTO)
         {

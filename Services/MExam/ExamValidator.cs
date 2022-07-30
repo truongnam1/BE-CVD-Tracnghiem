@@ -20,6 +20,8 @@ namespace Tracnghiem.Services.MExam
         Task<bool> Delete(Exam Exam);
         Task<bool> BulkDelete(List<Exam> Exams);
         Task<bool> Import(List<Exam> Exams);
+        Task<bool> Send(Exam Exam);
+
     }
 
     public class ExamValidator : IExamValidator
@@ -41,12 +43,9 @@ namespace Tracnghiem.Services.MExam
 
         public async Task<bool> Create(Exam Exam)
         {
-            await ValidateCode(Exam);
             await ValidateName(Exam);
             await ValidateTotalMark(Exam);
-            await ValidateTotalQuestion(Exam);
             await ValidateTime(Exam);
-            await ValidateCreator(Exam);
             await ValidateExamLevel(Exam);
             await ValidateExamStatus(Exam);
             await ValidateGrade(Exam);
@@ -61,12 +60,9 @@ namespace Tracnghiem.Services.MExam
         {
             if (await ValidateId(Exam))
             {
-                await ValidateCode(Exam);
                 await ValidateName(Exam);
                 await ValidateTotalMark(Exam);
-                await ValidateTotalQuestion(Exam);
                 await ValidateTime(Exam);
-                await ValidateCreator(Exam);
                 await ValidateExamLevel(Exam);
                 await ValidateExamStatus(Exam);
                 await ValidateGrade(Exam);
@@ -100,7 +96,11 @@ namespace Tracnghiem.Services.MExam
         {
             return true;
         }
-        
+        public async Task<bool> Send(Exam Exam)
+        {
+            await ValidateId(Exam);
+            return Exam.IsValidated;
+        }
         private async Task<bool> ValidateId(Exam Exam)
         {
             ExamFilter ExamFilter = new ExamFilter
@@ -161,33 +161,34 @@ namespace Tracnghiem.Services.MExam
             return Exam.IsValidated;
         }
         private async Task<bool> ValidateTotalMark(Exam Exam)
-        {   
-            return true;
-        }
-        private async Task<bool> ValidateTotalQuestion(Exam Exam)
-        {   
+        {
+            if (Exam.TotalMark.HasValue)
+            {
+                if (Exam.TotalMark < 0)
+                {
+                    Exam.AddError(nameof(ExamValidator), nameof(Exam.TotalMark), ExamMessage.Error.TotalMarkInvalid, ExamMessage);
+
+                }
+                else
+                {
+                    if (Exam.ExamQuestionMappings != null && Exam.ExamQuestionMappings.Count() > 0)
+                    {
+                        decimal? totalMark = 0;
+                        Exam.ExamQuestionMappings.ForEach(x => totalMark += x.Mark == null ? 0 : x.Mark);
+                        if (totalMark != Exam.TotalMark)
+                        {
+                            Exam.AddError(nameof(ExamValidator), nameof(Exam.TotalMark), ExamMessage.Error.TotalMarkInvalid, ExamMessage);
+                        }
+                    }
+                }
+            }
             return true;
         }
         private async Task<bool> ValidateTime(Exam Exam)
-        {   
-            return true;
-        }
-        private async Task<bool> ValidateCreator(Exam Exam)
-        {       
-            if(Exam.CreatorId == 0)
+        {
+            if (Exam.Time.HasValue && Exam.Time <= 0)
             {
-                Exam.AddError(nameof(ExamValidator), nameof(Exam.Creator), ExamMessage.Error.CreatorEmpty, ExamMessage);
-            }
-            else
-            {
-                int count = await UOW.AppUserRepository.CountAll(new AppUserFilter
-                {
-                    Id = new IdFilter{ Equal =  Exam.CreatorId },
-                });
-                if(count == 0)
-                {
-                    Exam.AddError(nameof(ExamValidator), nameof(Exam.Creator), ExamMessage.Error.CreatorNotExisted, ExamMessage);
-                }
+                Exam.AddError(nameof(ExamValidator), nameof(Exam.Time), ExamMessage.Error.TimeInvalid, ExamMessage);
             }
             return true;
         }
@@ -312,6 +313,15 @@ namespace Tracnghiem.Services.MExam
                         if(Question == null)
                         {
                             ExamQuestionMapping.AddError(nameof(ExamValidator), nameof(ExamQuestionMapping.Question), ExamMessage.Error.ExamQuestionMapping_QuestionNotExisted, ExamMessage);
+                        }
+
+                        if (ExamQuestionMapping.Mark < 0)
+                        {
+                            ExamQuestionMapping.AddError(nameof(ExamValidator), nameof(ExamQuestionMapping.Mark), ExamMessage.Error.ExamQuestionMapping_MarkInvalid, ExamMessage);
+                        }
+                        if (Exam.TotalMark.HasValue && ExamQuestionMapping.Mark == null)
+                        {
+                            ExamQuestionMapping.AddError(nameof(ExamValidator), nameof(ExamQuestionMapping.Mark), ExamMessage.Error.ExamQuestionMapping_MarkInvalid, ExamMessage);
                         }
                     }
                     

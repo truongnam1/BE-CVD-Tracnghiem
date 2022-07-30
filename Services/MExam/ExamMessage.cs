@@ -41,8 +41,12 @@ namespace Tracnghiem.Services.MExam
             StatusNotExisted,
             SubjectEmpty,
             SubjectNotExisted,
+            TotalMarkInvalid,
+            TimeInvalid,
             ExamQuestionMapping_QuestionEmpty,
             ExamQuestionMapping_QuestionNotExisted,
+            ExamQuestionMapping_MarkInvalid,
+
         }
     }
 }

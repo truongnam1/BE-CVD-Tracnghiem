@@ -40,6 +40,7 @@ namespace Tracnghiem.Rpc.exam
         public const string Delete = Default + "/delete";
         public const string Import = Default + "/import";
         public const string Export = Default + "/export";
+        public const string Send = Default + "/send";
         public const string ExportTemplate = Default + "/export-template";
         public const string BulkDelete = Default + "/bulk-delete";
         
@@ -100,14 +101,14 @@ namespace Tracnghiem.Rpc.exam
             { "Thêm", new List<string> { 
                     Parent,
                     Master, Preview, Count, List, Get,
-                    Detail, Create, 
+                    Detail, Create, Send
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 
             { "Sửa", new List<string> { 
                     Parent,            
                     Master, Preview, Count, List, Get,
-                    Detail, Update, 
+                    Detail, Update, Send
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 

@@ -13,7 +13,7 @@ using Tracnghiem.Enums;
 
 namespace Tracnghiem.Services.MExam
 {
-    public interface IExamService :  IServiceScoped
+    public interface IExamService : IServiceScoped
     {
         Task<int> Count(ExamFilter ExamFilter);
         Task<List<Exam>> List(ExamFilter ExamFilter);
@@ -23,6 +23,8 @@ namespace Tracnghiem.Services.MExam
         Task<Exam> Delete(Exam Exam);
         Task<List<Exam>> BulkDelete(List<Exam> Exams);
         Task<List<Exam>> BulkMerge(List<Exam> Exams);
+        Task<Exam> Send(Exam Exam);
+
         Task<ExamFilter> ToFilter(ExamFilter ExamFilter);
     }
 
@@ -31,7 +33,7 @@ namespace Tracnghiem.Services.MExam
         private IUOW UOW;
         private ILogging Logging;
         private ICurrentContext CurrentContext;
-        
+
         private IExamValidator ExamValidator;
 
         public ExamService(
@@ -44,7 +46,7 @@ namespace Tracnghiem.Services.MExam
             this.UOW = UOW;
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
-           
+
             this.ExamValidator = ExamValidator;
         }
 
@@ -84,7 +86,7 @@ namespace Tracnghiem.Services.MExam
             await ExamValidator.Get(Exam);
             return Exam;
         }
-        
+
         public async Task<Exam> Create(Exam Exam)
         {
             if (!await ExamValidator.Create(Exam))
@@ -92,8 +94,16 @@ namespace Tracnghiem.Services.MExam
 
             try
             {
+                Exam.CreatorId = CurrentContext.UserId;
+                Exam.ExamStatusId = ExamStatusEnum.Draft.Id;
+                Exam.Code = string.Empty;
+                Exam.TotalQuestion = TotalQuestion(Exam);
                 await UOW.ExamRepository.Create(Exam);
                 Exam = await UOW.ExamRepository.Get(Exam.Id);
+                Exam.Code = $"Exam_{Exam.Id}";
+                await UOW.ExamRepository.Update(Exam);
+                Exam = await UOW.ExamRepository.Get(Exam.Id);
+
                 return Exam;
             }
             catch (Exception ex)
@@ -110,7 +120,7 @@ namespace Tracnghiem.Services.MExam
             try
             {
                 var oldData = await UOW.ExamRepository.Get(Exam.Id);
-
+                oldData.TotalQuestion = TotalQuestion(Exam);
                 await UOW.ExamRepository.Update(Exam);
 
                 Exam = await UOW.ExamRepository.Get(Exam.Id);
@@ -172,8 +182,26 @@ namespace Tracnghiem.Services.MExam
                 Logging.CreateSystemLog(ex, nameof(ExamService));
             }
             return null;
-        }     
-        
+        }
+        public async Task<Exam> Send(Exam Exam)
+        {
+            if (!await ExamValidator.Send(Exam))
+                return Exam;
+            try
+            {
+                var oldData = await UOW.ExamRepository.Get(Exam.Id);
+                oldData.ExamStatusId = ExamStatusEnum.Publish.Id;
+                await UOW.ExamRepository.Update(oldData);
+
+                Exam = await UOW.ExamRepository.Get(Exam.Id);
+                return Exam;
+            }
+            catch (Exception ex)
+            {
+                Logging.CreateSystemLog(ex, nameof(ExamService));
+            }
+            return null;
+        }
         public async Task<ExamFilter> ToFilter(ExamFilter filter)
         {
             if (filter.OrFilter == null) filter.OrFilter = new List<ExamFilter>();
@@ -223,6 +251,15 @@ namespace Tracnghiem.Services.MExam
                 }
             }
             return filter;
+        }
+        private long TotalQuestion(Exam Exam)
+        {
+            if (Exam.ExamQuestionMappings == null || Exam.ExamQuestionMappings.Count() == 0)
+                return 0;
+            else
+            {
+                return Exam.ExamQuestionMappings.Count();
+            }
         }
     }
 }
