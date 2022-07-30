@@ -47,7 +47,6 @@ namespace Tracnghiem.Rpc.exam
         public const string FilterListExamLevel = Default + "/filter-list-exam-level";
         public const string FilterListExamStatus = Default + "/filter-list-exam-status";
         public const string FilterListGrade = Default + "/filter-list-grade";
-        public const string FilterListImage = Default + "/filter-list-image";
         public const string FilterListStatus = Default + "/filter-list-status";
         public const string FilterListSubject = Default + "/filter-list-subject";
         public const string FilterListQuestion = Default + "/filter-list-question";
@@ -56,7 +55,6 @@ namespace Tracnghiem.Rpc.exam
         public const string SingleListExamLevel = Default + "/single-list-exam-level";
         public const string SingleListExamStatus = Default + "/single-list-exam-status";
         public const string SingleListGrade = Default + "/single-list-grade";
-        public const string SingleListImage = Default + "/single-list-image";
         public const string SingleListStatus = Default + "/single-list-status";
         public const string SingleListSubject = Default + "/single-list-subject";
         public const string SingleListQuestion = Default + "/single-list-question";
@@ -82,10 +80,10 @@ namespace Tracnghiem.Rpc.exam
         };
 
         private static List<string> FilterList = new List<string> { 
-            FilterListAppUser,FilterListExamLevel,FilterListExamStatus,FilterListGrade,FilterListImage,FilterListStatus,FilterListSubject,FilterListQuestion,
+            FilterListAppUser,FilterListExamLevel,FilterListExamStatus,FilterListGrade,FilterListStatus,FilterListSubject,FilterListQuestion,
         };
         private static List<string> SingleList = new List<string> { 
-            SingleListAppUser, SingleListExamLevel, SingleListExamStatus, SingleListGrade, SingleListImage, SingleListStatus, SingleListSubject, SingleListQuestion, 
+            SingleListAppUser, SingleListExamLevel, SingleListExamStatus, SingleListGrade, SingleListStatus, SingleListSubject, SingleListQuestion, 
         };
         private static List<string> CountList = new List<string> { 
             CountQuestion, ListQuestion, 
