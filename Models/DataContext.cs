@@ -590,8 +590,6 @@ namespace Tracnghiem.Models
 
             modelBuilder.Entity<QuestionDAO>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Code).HasMaxLength(500);
 
                 entity.Property(e => e.Content)

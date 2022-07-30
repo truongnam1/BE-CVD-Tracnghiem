@@ -70,7 +70,6 @@ namespace Tracnghiem.Rpc.image
             return new Image_ImageDTO(Image);
         }
 
-        [AllowAnonymous]
         [Route(ImageRoute.Create), HttpPost]
         public async Task<ActionResult<Image_ImageDTO>> Create(IFormFile file)
         {
