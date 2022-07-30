@@ -19,31 +19,6 @@ namespace Tracnghiem.Rpc.exam_history
 {
     public partial class ExamHistoryController 
     {
-        [Route(ExamHistoryRoute.SingleListAppUser), HttpPost]
-        public async Task<List<ExamHistory_AppUserDTO>> SingleListAppUser([FromBody] ExamHistory_AppUserFilterDTO ExamHistory_AppUserFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-
-            AppUserFilter AppUserFilter = new AppUserFilter();
-            AppUserFilter.Skip = 0;
-            AppUserFilter.Take = 20;
-            AppUserFilter.OrderBy = AppUserOrder.Id;
-            AppUserFilter.OrderType = OrderType.ASC;
-            AppUserFilter.Selects = AppUserSelect.ALL;
-            AppUserFilter.Id = ExamHistory_AppUserFilterDTO.Id;
-            AppUserFilter.Username = ExamHistory_AppUserFilterDTO.Username;
-            AppUserFilter.DisplayName = ExamHistory_AppUserFilterDTO.DisplayName;
-            AppUserFilter.Password = ExamHistory_AppUserFilterDTO.Password;
-            AppUserFilter.RefreshToken = ExamHistory_AppUserFilterDTO.RefreshToken;
-            AppUserFilter.RoleId = ExamHistory_AppUserFilterDTO.RoleId;
-            AppUserFilter.ImageId = ExamHistory_AppUserFilterDTO.ImageId;
-
-            List<AppUser> AppUsers = await AppUserService.List(AppUserFilter);
-            List<ExamHistory_AppUserDTO> ExamHistory_AppUserDTOs = AppUsers
-                .Select(x => new ExamHistory_AppUserDTO(x)).ToList();
-            return ExamHistory_AppUserDTOs;
-        }
         [Route(ExamHistoryRoute.SingleListExam), HttpPost]
         public async Task<List<ExamHistory_ExamDTO>> SingleListExam([FromBody] ExamHistory_ExamFilterDTO ExamHistory_ExamFilterDTO)
         {

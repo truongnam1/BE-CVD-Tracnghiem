@@ -107,29 +107,6 @@ namespace Tracnghiem.Rpc.exam
                 .Select(x => new Exam_GradeDTO(x)).ToList();
             return Exam_GradeDTOs;
         }
-        [Route(ExamRoute.FilterListImage), HttpPost]
-        public async Task<List<Exam_ImageDTO>> FilterListImage([FromBody] Exam_ImageFilterDTO Exam_ImageFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-
-            ImageFilter ImageFilter = new ImageFilter();
-            ImageFilter.Skip = 0;
-            ImageFilter.Take = 20;
-            ImageFilter.OrderBy = ImageOrder.Id;
-            ImageFilter.OrderType = OrderType.ASC;
-            ImageFilter.Selects = ImageSelect.ALL;
-            ImageFilter.Id = Exam_ImageFilterDTO.Id;
-            ImageFilter.Name = Exam_ImageFilterDTO.Name;
-            ImageFilter.Url = Exam_ImageFilterDTO.Url;
-            ImageFilter.SearchBy = ImageSearch.Name;
-            ImageFilter.Search = Exam_ImageFilterDTO.Search;
-
-            List<Image> Images = await ImageService.List(ImageFilter);
-            List<Exam_ImageDTO> Exam_ImageDTOs = Images
-                .Select(x => new Exam_ImageDTO(x)).ToList();
-            return Exam_ImageDTOs;
-        }
         [Route(ExamRoute.FilterListStatus), HttpPost]
         public async Task<List<Exam_StatusDTO>> FilterListStatus([FromBody] Exam_StatusFilterDTO Exam_StatusFilterDTO)
         {
