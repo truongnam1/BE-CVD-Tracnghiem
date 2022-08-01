@@ -28,6 +28,8 @@ namespace Tracnghiem.Models
         public long TotalQuestion { get; set; }
         public long? ImageId { get; set; }
         public long? Time { get; set; }
+        public long CurrentMonthNumberTest { get; set; }
+        public long TotalNumberTest { get; set; }
 
         public virtual AppUserDAO Creator { get; set; }
         public virtual ExamLevelDAO ExamLevel { get; set; }

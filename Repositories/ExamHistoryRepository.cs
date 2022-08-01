@@ -26,6 +26,7 @@ namespace Tracnghiem.Repositories
         Task<bool> Delete(ExamHistory ExamHistory);
         Task<List<long>> BulkMerge(List<ExamHistory> ExamHistories);
         Task<bool> BulkDelete(List<ExamHistory> ExamHistories);
+
     }
     public class ExamHistoryRepository : IExamHistoryRepository
     {

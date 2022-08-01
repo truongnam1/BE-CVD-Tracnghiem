@@ -205,6 +205,9 @@ namespace Tracnghiem.Repositories
                 TotalQuestion = filter.Selects.Contains(ExamSelect.TotalQuestion) ? q.TotalQuestion : default(long),
                 ImageId = filter.Selects.Contains(ExamSelect.Image) ? q.ImageId : default(long?),
                 Time = filter.Selects.Contains(ExamSelect.Time) ? q.Time : default(long?),
+                CurrentMonthNumberTest = filter.Selects.Contains(ExamSelect.CurrentMonthNumberTest) ? q.CurrentMonthNumberTest : default(long),
+                TotalNumberTest = filter.Selects.Contains(ExamSelect.TotalNumberTest) ? q.TotalNumberTest : default(long),
+
                 Creator = filter.Selects.Contains(ExamSelect.Creator) && q.Creator != null ? new AppUser
                 {
                     Id = q.Creator.Id,
@@ -308,6 +311,8 @@ namespace Tracnghiem.Repositories
                 TotalQuestion = x.TotalQuestion,
                 ImageId = x.ImageId,
                 Time = x.Time,
+                CurrentMonthNumberTest = x.CurrentMonthNumberTest,
+                TotalNumberTest = x.TotalNumberTest,
                 Creator = x.Creator == null ? null : new AppUser
                 {
                     Id = x.Creator.Id,
@@ -377,13 +382,12 @@ namespace Tracnghiem.Repositories
                     },
                 }).ToListAsync();
 
-            foreach(Exam Exam in Exams)
+            foreach (Exam Exam in Exams)
             {
                 Exam.ExamQuestionMappings = ExamQuestionMappings
                     .Where(x => x.ExamId == Exam.Id)
                     .ToList();
             }
-
 
             return Exams;
         }
@@ -410,6 +414,8 @@ namespace Tracnghiem.Repositories
                 TotalQuestion = x.TotalQuestion,
                 ImageId = x.ImageId,
                 Time = x.Time,
+                CurrentMonthNumberTest = x.CurrentMonthNumberTest,
+                TotalNumberTest = x.TotalNumberTest,
                 Creator = x.Creator == null ? null : new AppUser
                 {
                     Id = x.Creator.Id,
@@ -498,6 +504,8 @@ namespace Tracnghiem.Repositories
             ExamDAO.TotalQuestion = Exam.TotalQuestion;
             ExamDAO.ImageId = Exam.ImageId;
             ExamDAO.Time = Exam.Time;
+            ExamDAO.CurrentMonthNumberTest = Exam.CurrentMonthNumberTest;
+            ExamDAO.TotalNumberTest = Exam.TotalNumberTest;
             ExamDAO.RowId = Guid.NewGuid();
             ExamDAO.CreatedAt = StaticParams.DateTimeNow;
             ExamDAO.UpdatedAt = StaticParams.DateTimeNow;
@@ -528,6 +536,8 @@ namespace Tracnghiem.Repositories
             ExamDAO.TotalQuestion = Exam.TotalQuestion;
             ExamDAO.ImageId = Exam.ImageId;
             ExamDAO.Time = Exam.Time;
+            ExamDAO.CurrentMonthNumberTest = Exam.CurrentMonthNumberTest;
+            ExamDAO.TotalNumberTest = Exam.TotalNumberTest;
             ExamDAO.UpdatedAt = StaticParams.DateTimeNow;
             await DataContext.SaveChangesAsync();
             await SaveReference(Exam);

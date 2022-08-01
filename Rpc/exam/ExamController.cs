@@ -23,6 +23,7 @@ using Tracnghiem.Services.MImage;
 using Tracnghiem.Services.MStatus;
 using Tracnghiem.Services.MSubject;
 using Tracnghiem.Services.MQuestion;
+using Tracnghiem.Enums;
 
 namespace Tracnghiem.Rpc.exam
 {
@@ -89,6 +90,32 @@ namespace Tracnghiem.Rpc.exam
             return Exam_ExamDTOs;
         }
 
+        [AllowAnonymous]
+        [Route(ExamRoute.PublicList), HttpPost]
+        public async Task<ActionResult<List<Exam_ExamDTO>>> PublicList([FromBody] Exam_ExamFilterDTO Exam_ExamFilterDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            ExamFilter ExamFilter = ConvertFilterDTOToFilterEntity(Exam_ExamFilterDTO);
+            ExamFilter.ExamStatusId = new IdFilter { Equal = ExamStatusEnum.Public.Id };
+            ExamFilter.StatusId = new IdFilter { Equal = StatusEnum.ACTIVE.Id };
+            ExamFilter = await ExamService.ToFilter(ExamFilter);
+            List<Exam> Exams = await ExamService.List(ExamFilter);
+            List<Exam_ExamDTO> Exam_ExamDTOs = Exams
+                .Select(c => new Exam_ExamDTO(c)).ToList();
+            return Exam_ExamDTOs;
+        }
+
+        [AllowAnonymous]
+        [Route(ExamRoute.MonthMostTested), HttpPost]
+        public async Task<ActionResult<List<Exam_ExamDTO>>> MonthMostTested()
+        {
+            List<Exam> Exams = await ExamService.MonthMostTested();
+            List<Exam_ExamDTO> Exam_ExamDTOs = Exams
+                .Select(c => new Exam_ExamDTO(c)).ToList();
+            return Exam_ExamDTOs;
+        }
         [Route(ExamRoute.Get), HttpPost]
         public async Task<ActionResult<Exam_ExamDTO>> Get([FromBody]Exam_ExamDTO Exam_ExamDTO)
         {
@@ -120,24 +147,24 @@ namespace Tracnghiem.Rpc.exam
                 return BadRequest(Exam_ExamDTO);
         }
 
-        [Route(ExamRoute.Send), HttpPost]
+        //[Route(ExamRoute.Send), HttpPost]
 
-        public async Task<ActionResult<Exam_ExamDTO>> Send([FromBody] Exam_ExamDTO Exam_ExamDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
+        //public async Task<ActionResult<Exam_ExamDTO>> Send([FromBody] Exam_ExamDTO Exam_ExamDTO)
+        //{
+        //    if (!ModelState.IsValid)
+        //        throw new BindException(ModelState);
 
-            if (!await HasPermission(Exam_ExamDTO.Id))
-                return Forbid();
+        //    if (!await HasPermission(Exam_ExamDTO.Id))
+        //        return Forbid();
 
-            Exam Exam = ConvertDTOToEntity(Exam_ExamDTO);
-            Exam = await ExamService.Send(Exam);
-            Exam_ExamDTO = new Exam_ExamDTO(Exam);
-            if (Exam.IsValidated)
-                return Exam_ExamDTO;
-            else
-                return BadRequest(Exam_ExamDTO);
-        }
+        //    Exam Exam = ConvertDTOToEntity(Exam_ExamDTO);
+        //    Exam = await ExamService.Send(Exam);
+        //    Exam_ExamDTO = new Exam_ExamDTO(Exam);
+        //    if (Exam.IsValidated)
+        //        return Exam_ExamDTO;
+        //    else
+        //        return BadRequest(Exam_ExamDTO);
+        //}
 
         [Route(ExamRoute.Update), HttpPost]
         public async Task<ActionResult<Exam_ExamDTO>> Update([FromBody] Exam_ExamDTO Exam_ExamDTO)

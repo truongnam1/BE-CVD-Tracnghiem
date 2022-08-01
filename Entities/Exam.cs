@@ -22,6 +22,8 @@ namespace Tracnghiem.Entities
         public long TotalQuestion { get; set; }
         public long? ImageId { get; set; }
         public long? Time { get; set; }
+        public long CurrentMonthNumberTest { get; set; }
+        public long TotalNumberTest { get; set; }
         public AppUser Creator { get; set; }
         public ExamLevel ExamLevel { get; set; }
         public ExamStatus ExamStatus { get; set; }
@@ -87,6 +89,8 @@ namespace Tracnghiem.Entities
         public IdFilter ExamStatusId { get; set; }
         public DecimalFilter TotalMark { get; set; }
         public LongFilter TotalQuestion { get; set; }
+        public LongFilter CurrentMonthNumberTest { get; set; }
+        public LongFilter TotalNumberTest { get; set; }
         public IdFilter ImageId { get; set; }
         public LongFilter Time { get; set; }
         public DateFilter CreatedAt { get; set; }
@@ -114,6 +118,8 @@ namespace Tracnghiem.Entities
         TotalQuestion = 14,
         Image = 15,
         Time = 16,
+        CurrentMonthNumberTest = 17,
+        TotalNumberTest = 18,
         CreatedAt = 50,
         UpdatedAt = 51,
     }
@@ -135,6 +141,8 @@ namespace Tracnghiem.Entities
         TotalQuestion = E._14,
         Image = E._15,
         Time = E._16,
+        CurrentMonthNumberTest = E._17,
+        TotalNumberTest = E._18,
     }
 
     [Flags]
