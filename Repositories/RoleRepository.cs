@@ -27,6 +27,8 @@ namespace Tracnghiem.Repositories
         Task<bool> BulkMerge(Site Site);
         Task<bool> Used(List<long> Ids);
         Task<long> InitAdmin(string SiteCode);
+        Task<long> InitUser(string SiteCode);
+
         Task<List<long>> ListIds(long AppUserId);
     }
     public class RoleRepository : CacheRepository, IRoleRepository
@@ -855,6 +857,130 @@ namespace Tracnghiem.Repositories
             }
 
             return AdminRole.Id;
+        }
+        public async Task<long> InitUser(string SiteCode)
+        {
+            SiteDAO Site = await DataContext.Site.Where(x => x.Code == SiteCode).FirstOrDefaultAsync();
+            long SiteId = Site.Id;
+            string SiteName = Site.Name.ChangeToEnglishChar().Trim();
+            string UserRoleName = $"{SiteName}_USER";
+            RoleDAO UserRole = await DataContext.Role.AsNoTracking()
+               .Where(r => r.Name == UserRoleName).FirstOrDefaultAsync();
+
+            if (UserRole == null)
+            {
+                UserRole = new RoleDAO
+                {
+                    Name = $"{SiteName}_USER",
+                    Code = $"{SiteName}_USER",
+                    StatusId = StatusEnum.ACTIVE.Id,
+                    SiteId = SiteId,
+                };
+                DataContext.Role.Add(UserRole);
+                DataContext.SaveChanges();
+            }
+
+            List<MenuDAO> Menus = DataContext.Menu.AsNoTracking().Where(x => x.SiteId == SiteId)
+                .Include(v => v.Actions)
+                .ToList();
+            List<PermissionDAO> permissions = DataContext.Permission.AsNoTracking().Where(x => x.Role.SiteId == SiteId)
+                .Include(p => p.PermissionActionMappings)
+                .ToList();
+            foreach (MenuDAO Menu in Menus)
+            {
+                PermissionDAO permission = permissions
+                    .Where(p => p.MenuId == Menu.Id && p.RoleId == UserRole.Id)
+                    .FirstOrDefault();
+                if (permission == null)
+                {
+                    permission = new PermissionDAO
+                    {
+                        Code = $"{Site.Name}.{UserRole.Code}" + "_" + Menu.Name,
+                        Name = $"{Site.Name}.{UserRole.Code}" + "_" + Menu.Name,
+                        MenuId = Menu.Id,
+                        RoleId = UserRole.Id,
+                        StatusId = StatusEnum.ACTIVE.Id,
+                        PermissionActionMappings = new List<PermissionActionMappingDAO>(),
+                    };
+                    permissions.Add(permission);
+                }
+                else
+                {
+                    permission.StatusId = StatusEnum.ACTIVE.Id;
+                    if (permission.PermissionActionMappings == null)
+                        permission.PermissionActionMappings = new List<PermissionActionMappingDAO>();
+                }
+                foreach (ActionDAO action in Menu.Actions)
+                {
+                    PermissionActionMappingDAO PermissionActionMappingDAO = permission.PermissionActionMappings
+                        .Where(ppm => ppm.ActionId == action.Id).FirstOrDefault();
+                    if (PermissionActionMappingDAO == null)
+                    {
+                        PermissionActionMappingDAO = new PermissionActionMappingDAO
+                        {
+                            ActionId = action.Id
+                        };
+                        permission.PermissionActionMappings.Add(PermissionActionMappingDAO);
+                    }
+                }
+
+            }
+            DataContext.Permission.BulkMerge(permissions);
+            permissions.ForEach(p =>
+            {
+                foreach (var action in p.PermissionActionMappings)
+                {
+                    action.PermissionId = p.Id;
+                }
+            });
+
+            List<PermissionActionMappingDAO> PermissionActionMappingDAOs = permissions
+                .SelectMany(p => p.PermissionActionMappings).ToList();
+            DataContext.PermissionContent.Where(pf => pf.Permission.RoleId == UserRole.Id).DeleteFromQuery();
+            DataContext.PermissionActionMapping.Where(pf => pf.Permission.RoleId == UserRole.Id).DeleteFromQuery();
+            DataContext.PermissionActionMapping.BulkMerge(PermissionActionMappingDAOs);
+
+            AppUserDAO SiteAdmin = await DataContext.AppUser
+                .Where(au => au.Username.ToLower() == $"{SiteName}_Administrator".ToLower() && au.DeletedAt == null)
+                .FirstOrDefaultAsync();
+            AppUserDAO Admin = await DataContext.AppUser
+                .Where(au => au.Username.ToLower() == "Administrator".ToLower() && au.DeletedAt == null)
+                .FirstOrDefaultAsync();
+
+            if (SiteAdmin != null)
+            {
+                AppUserRoleMappingDAO SiteAdminRoleMappingDAO = await DataContext.AppUserRoleMapping.AsNoTracking()
+                    .Where(ur => ur.RoleId == UserRole.Id && ur.AppUserId == SiteAdmin.Id)
+                    .FirstOrDefaultAsync();
+                if (SiteAdminRoleMappingDAO == null)
+                {
+                    SiteAdminRoleMappingDAO = new AppUserRoleMappingDAO
+                    {
+                        AppUserId = SiteAdmin.Id,
+                        RoleId = UserRole.Id,
+                    };
+                    DataContext.AppUserRoleMapping.Add(SiteAdminRoleMappingDAO);
+                    DataContext.SaveChanges();
+                }
+            }
+            if (Admin != null)
+            {
+                AppUserRoleMappingDAO AdminRoleMappingDAO = await DataContext.AppUserRoleMapping.AsNoTracking()
+                    .Where(ur => ur.RoleId == UserRole.Id && ur.AppUserId == Admin.Id)
+                    .FirstOrDefaultAsync();
+
+                if (AdminRoleMappingDAO == null)
+                {
+                    AdminRoleMappingDAO = new AppUserRoleMappingDAO
+                    {
+                        AppUserId = Admin.Id,
+                        RoleId = UserRole.Id,
+                    };
+                    DataContext.AppUserRoleMapping.Add(AdminRoleMappingDAO);
+                    DataContext.SaveChanges();
+                }
+            }
+            return 1;
         }
 
         public async Task<bool> Used(List<long> Ids)

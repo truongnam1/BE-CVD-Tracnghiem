@@ -108,6 +108,21 @@ namespace Tracnghiem.Rpc.exam
         }
 
         [AllowAnonymous]
+        [Route(ExamRoute.PublicCount), HttpPost]
+        public async Task<ActionResult<int>> PublicCount([FromBody] Exam_ExamFilterDTO Exam_ExamFilterDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            ExamFilter ExamFilter = ConvertFilterDTOToFilterEntity(Exam_ExamFilterDTO);
+            ExamFilter.ExamStatusId = new IdFilter { Equal = ExamStatusEnum.Public.Id };
+            ExamFilter.StatusId = new IdFilter { Equal = StatusEnum.ACTIVE.Id };
+            //ExamFilter = await ExamService.ToFilter(ExamFilter);
+            int count = await ExamService.Count(ExamFilter);
+            return count;
+        }
+
+        [AllowAnonymous]
         [Route(ExamRoute.MonthMostTested), HttpPost]
         public async Task<ActionResult<List<Exam_ExamDTO>>> MonthMostTested()
         {
