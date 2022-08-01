@@ -11,11 +11,13 @@ namespace Tracnghiem.Enums
          
  
         public static GenericEnum Draft = new GenericEnum (Id : 1, Code : "Draft", Name : "Nháp");
-        public static GenericEnum Publish = new GenericEnum(Id: 2, Code: "Publish", Name: "Đã xuất bản");
+        public static GenericEnum Public = new GenericEnum(Id: 2, Code: "Public", Name: "Công khai");
+        public static GenericEnum Private = new GenericEnum(Id: 3, Code: "Private", Name: "Riêng tư");
+
 
         public static List<GenericEnum> ExamStatusEnumList = new List<GenericEnum>
         {
-            Draft, Publish
+            Draft, Public, Private
         };
     }
 }

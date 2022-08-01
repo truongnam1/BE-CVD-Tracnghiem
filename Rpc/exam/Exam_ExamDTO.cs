@@ -22,6 +22,8 @@ namespace Tracnghiem.Rpc.exam
         public long TotalQuestion { get; set; }
         public long? ImageId { get; set; }
         public long? Time { get; set; }
+        public long CurrentMonthNumberTest { get; set; }
+        public long TotalNumberTest { get; set; }
         public Exam_AppUserDTO Creator { get; set; }
         public Exam_ExamLevelDTO ExamLevel { get; set; }
         public Exam_ExamStatusDTO ExamStatus { get; set; }
@@ -49,6 +51,8 @@ namespace Tracnghiem.Rpc.exam
             this.TotalQuestion = Exam.TotalQuestion;
             this.ImageId = Exam.ImageId;
             this.Time = Exam.Time;
+            this.CurrentMonthNumberTest = Exam.CurrentMonthNumberTest;
+            this.TotalNumberTest = Exam.TotalNumberTest;
             this.Creator = Exam.Creator == null ? null : new Exam_AppUserDTO(Exam.Creator);
             this.ExamLevel = Exam.ExamLevel == null ? null : new Exam_ExamLevelDTO(Exam.ExamLevel);
             this.ExamStatus = Exam.ExamStatus == null ? null : new Exam_ExamStatusDTO(Exam.ExamStatus);
@@ -81,6 +85,8 @@ namespace Tracnghiem.Rpc.exam
         public LongFilter TotalQuestion { get; set; }
         public IdFilter ImageId { get; set; }
         public LongFilter Time { get; set; }
+        public LongFilter CurrentMonthNumberTest { get; set; }
+        public LongFilter TotalNumberTest { get; set; }
         public DateFilter CreatedAt { get; set; }
         public DateFilter UpdatedAt { get; set; }
         public string Search { get; set; }

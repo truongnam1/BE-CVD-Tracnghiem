@@ -23,7 +23,7 @@ namespace Tracnghiem.Services.MExam
         Task<Exam> Delete(Exam Exam);
         Task<List<Exam>> BulkDelete(List<Exam> Exams);
         Task<List<Exam>> BulkMerge(List<Exam> Exams);
-        Task<Exam> Send(Exam Exam);
+        Task<List<Exam>> MonthMostTested();
 
         Task<ExamFilter> ToFilter(ExamFilter ExamFilter);
     }
@@ -95,7 +95,7 @@ namespace Tracnghiem.Services.MExam
             try
             {
                 Exam.CreatorId = CurrentContext.UserId;
-                Exam.ExamStatusId = ExamStatusEnum.Draft.Id;
+                //Exam.ExamStatusId = ExamStatusEnum.Draft.Id;
                 Exam.Code = string.Empty;
                 Exam.TotalQuestion = TotalQuestion(Exam);
                 await UOW.ExamRepository.Create(Exam);
@@ -183,25 +183,29 @@ namespace Tracnghiem.Services.MExam
             }
             return null;
         }
-        public async Task<Exam> Send(Exam Exam)
+        public async Task<List<Exam>> MonthMostTested()
         {
-            if (!await ExamValidator.Send(Exam))
-                return Exam;
             try
             {
-                var oldData = await UOW.ExamRepository.Get(Exam.Id);
-                oldData.ExamStatusId = ExamStatusEnum.Publish.Id;
-                await UOW.ExamRepository.Update(oldData);
-
-                Exam = await UOW.ExamRepository.Get(Exam.Id);
-                return Exam;
+                ExamFilter ExamFilter = new ExamFilter();
+                ExamFilter.Skip = 0;
+                ExamFilter.Take = 10;
+                ExamFilter.OrderBy = ExamOrder.CurrentMonthNumberTest;
+                ExamFilter.OrderType = OrderType.DESC;
+                ExamFilter.ExamStatusId = new IdFilter { Equal = ExamStatusEnum.Public.Id };
+                ExamFilter.StatusId = new IdFilter { Equal = StatusEnum.ACTIVE.Id };
+                List<Exam> Exams = await UOW.ExamRepository.List(ExamFilter);
+                return Exams;
             }
             catch (Exception ex)
             {
                 Logging.CreateSystemLog(ex, nameof(ExamService));
+
             }
+
             return null;
         }
+
         public async Task<ExamFilter> ToFilter(ExamFilter filter)
         {
             if (filter.OrFilter == null) filter.OrFilter = new List<ExamFilter>();
