@@ -49,6 +49,7 @@ namespace Tracnghiem.Rpc.exam
         public const string PublicList = Default + "/public-list";
         public const string PublicCount = Default + "/public-count";
         public const string MonthMostTested = Default + "/month-most-tested";
+        public const string UploadImage = Default + "/upload-image";
 
 
         public const string FilterListAppUser = Default + "/filter-list-app-user";
@@ -108,14 +109,14 @@ namespace Tracnghiem.Rpc.exam
             { "Thêm", new List<string> { 
                     Parent,
                     Master, Preview, Count, List, Get,
-                    Detail, Create, Send
+                    Detail, Create, Send, UploadImage
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 
             { "Sửa", new List<string> { 
                     Parent,            
                     Master, Preview, Count, List, Get,
-                    Detail, Update, Send
+                    Detail, Update, Send, UploadImage
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 

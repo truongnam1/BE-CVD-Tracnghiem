@@ -466,6 +466,19 @@ namespace Tracnghiem.Rpc.exam
             return File(output.ToArray(), "application/octet-stream", "Exam.xlsx");
         }
 
+        [Route(ExamRoute.UploadImage), HttpPost]
+        public async Task<ActionResult<Exam_ImageDTO>> UploadImage(IFormFile file)
+        {
+
+            Image Image = await ImageService.Create(file);
+            if (!Image.IsValidated)
+            {
+                return BadRequest(new Exam_ImageDTO(Image));
+            }
+            else
+                return new Exam_ImageDTO(Image);
+
+        }
         private async Task<bool> HasPermission(long Id)
         {
             ExamFilter ExamFilter = new ExamFilter();
