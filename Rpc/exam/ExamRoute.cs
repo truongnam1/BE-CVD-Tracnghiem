@@ -43,8 +43,9 @@ namespace Tracnghiem.Rpc.exam
         public const string Send = Default + "/send";
         public const string ExportTemplate = Default + "/export-template";
         public const string BulkDelete = Default + "/bulk-delete";
-
+        
         public const string PublicList = Default + "/public-list";
+        public const string PublicCount = Default + "/public-count";
         public const string MonthMostTested = Default + "/month-most-tested";
 
 
@@ -98,48 +99,48 @@ namespace Tracnghiem.Rpc.exam
         {
             { "Tìm kiếm", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List, PublicList, MonthMostTested,
+                    Master, Preview, Count, List,
                     Get,  
                 }.Concat(FilterList)
             },
             { "Thêm", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List, Get, PublicList, MonthMostTested,
+                    Master, Preview, Count, List, Get,
                     Detail, Create, Send
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 
             { "Sửa", new List<string> { 
                     Parent,            
-                    Master, Preview, Count, List, Get, PublicList, MonthMostTested,
+                    Master, Preview, Count, List, Get,
                     Detail, Update, Send
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 
             { "Xoá", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List, Get, PublicList, MonthMostTested,
+                    Master, Preview, Count, List, Get,
                     Delete, 
                 }.Concat(SingleList).Concat(FilterList) 
             },
 
             { "Xoá nhiều", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List, Get, PublicList, MonthMostTested,
+                    Master, Preview, Count, List, Get,
                     BulkDelete 
                 }.Concat(FilterList) 
             },
 
             { "Xuất excel", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List, Get, PublicList, MonthMostTested,
+                    Master, Preview, Count, List, Get,
                     Export 
                 }.Concat(FilterList) 
             },
 
             { "Nhập excel", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List, Get, PublicList, MonthMostTested,
+                    Master, Preview, Count, List, Get,
                     ExportTemplate, Import 
                 }.Concat(FilterList) 
             },

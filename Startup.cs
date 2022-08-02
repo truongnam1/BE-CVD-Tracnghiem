@@ -71,7 +71,7 @@ namespace Tracnghiem
                     options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                     options.SerializerSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffK";
                 });
-
+            services.AddCors();
             services.AddPermission(Configuration.GetConnectionString("DataContext"));
 
             services.AddSingleton<IRedisStore, RedisStore>();
@@ -214,6 +214,10 @@ namespace Tracnghiem
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
+            app.UseCors(options =>
+     options.WithOrigins("*")
+            .AllowAnyHeader()
+            );
             app.UseMiddleware<ErrorHandlingMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
