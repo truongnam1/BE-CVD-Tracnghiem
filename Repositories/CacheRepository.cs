@@ -39,8 +39,8 @@ namespace Tracnghiem.Repositories
                 ConnectRetry = 5,
                 SyncTimeout = 1000,
                 AbortOnConnectFail = false,
-                Password = "1httiaO01EARoo29Wcw3o53nYQ3ow8yE",
-                User = "default"
+                //Password = "1httiaO01EARoo29Wcw3o53nYQ3ow8yE",
+                //User = "default"
             };
             int poolSize = 200;
             _connectionPool = ConnectionMultiplexerPoolFactory.Create(
