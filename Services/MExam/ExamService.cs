@@ -18,6 +18,8 @@ namespace Tracnghiem.Services.MExam
         Task<int> Count(ExamFilter ExamFilter);
         Task<List<Exam>> List(ExamFilter ExamFilter);
         Task<Exam> Get(long Id);
+        Task<Exam> PublicGet(long Id);
+
         Task<Exam> Create(Exam Exam);
         Task<Exam> Update(Exam Exam);
         Task<Exam> Delete(Exam Exam);
@@ -86,6 +88,16 @@ namespace Tracnghiem.Services.MExam
             await ExamValidator.Get(Exam);
             return Exam;
         }
+
+        public async Task<Exam> PublicGet(long Id)
+        {
+            Exam Exam = await UOW.ExamRepository.Get(Id);
+            if (Exam == null || !(Exam.ExamStatusId == ExamStatusEnum.Public.Id))
+                return null;
+            await ExamValidator.Get(Exam);
+            return Exam;
+        }
+
 
         public async Task<Exam> Create(Exam Exam)
         {
