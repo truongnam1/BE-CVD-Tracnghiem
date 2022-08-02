@@ -144,6 +144,17 @@ namespace Tracnghiem.Rpc.exam
             return new Exam_ExamDTO(Exam);
         }
 
+        [AllowAnonymous]
+        [Route(ExamRoute.PublicGet), HttpPost]
+        public async Task<ActionResult<Exam_ExamDTO>> PublicGet([FromBody] Exam_ExamDTO Exam_ExamDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            Exam Exam = await ExamService.PublicGet(Exam_ExamDTO.Id);
+            return new Exam_ExamDTO(Exam);
+        }
+
         [Route(ExamRoute.Create), HttpPost]
         public async Task<ActionResult<Exam_ExamDTO>> Create([FromBody] Exam_ExamDTO Exam_ExamDTO)
         {
