@@ -16,31 +16,6 @@ using Tracnghiem.Services.MImage;
 
 namespace Tracnghiem.Rpc.app_user
 {
-    public class ProfileRoot
-    {
-        public const string Login = "rpc/tracnghiem/account/login";
-        public const string LoginByGmail = "rpc/tracnghiem/account/login-by-gmail";
-        public const string LDAPLogin = "rpc/tracnghiem/account/ldap-login";
-        public const string Logged = "rpc/tracnghiem/account/logged";
-        public const string GetForWeb = "rpc/tracnghiem/profile-web/get";
-        public const string Get = "rpc/tracnghiem/profile/get";
-        public const string GetDraft = "rpc/tracnghiem/profile/get-draft";
-        public const string Update = "rpc/tracnghiem/profile/update";
-        public const string SaveImage = "rpc/tracnghiem/profile/save-image";
-        public const string ChangePassword = "rpc/tracnghiem/profile/change-password";
-        public const string RecoveryPasswordByOTP = "rpc/tracnghiem/profile/recovery-password-by-otp";
-        public const string ForgotPassword = "rpc/tracnghiem/profile/forgot-password";
-        public const string VerifyOtpCode = "rpc/tracnghiem/profile/verify-otp-code";
-        public const string RecoveryPassword = "rpc/tracnghiem/profile/recovery-password";
-        public const string SingleListSex = "rpc/tracnghiem/profile/single-list-sex";
-        public const string SingleListProvince = "rpc/tracnghiem/profile/single-list-province";
-        public const string ListSite = "rpc/tracnghiem/profile/list-site";
-        public const string RefreshToken = "rpc/tracnghiem/profile/refresh-token";
-        public const string CreateSession = "rpc/tracnghiem/profile/create-session";
-        public const string UpdateCurrentProject = "rpc/tracnghiem/profile/update-current-project";
-    }
-
-    //[Authorize]
     public class ProfileController : RpcController
     {
         private IAppUserService AppUserService;
@@ -125,9 +100,6 @@ namespace Tracnghiem.Rpc.app_user
         {
             if (!ModelState.IsValid)
                 throw new BindException(ModelState);
-            //if (!IsAppUser())
-            //    return Unauthorized();
-            //this.CurrentContext.UserId = ExtractUserId();
             AppUser AppUser = new AppUser
             {
                 Id = CurrentContext.UserId,
@@ -201,9 +173,6 @@ namespace Tracnghiem.Rpc.app_user
         {
             if (!ModelState.IsValid)
                 throw new BindException(ModelState);
-            //if (!IsAppUser())
-            //    return Unauthorized();
-            //var UserId = ExtractUserId();
             AppUser AppUser = new AppUser
             {
                 Id = CurrentContext.UserId,
@@ -255,9 +224,6 @@ namespace Tracnghiem.Rpc.app_user
         {
             if (!ModelState.IsValid)
                 throw new BindException(ModelState);
-            //if (!IsAppUser())
-            //    return Unauthorized();
-            //var UserId = ExtractUserId();
             AppUser AppUser = await AppUserService.Get(CurrentContext.UserId);
             AppUser_AppUserDTO AppUser_AppUserDTO = new AppUser_AppUserDTO(AppUser);
             //if (AppUser_AppUserDTO.AppUserSiteMappings != null)
