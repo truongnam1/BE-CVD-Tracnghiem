@@ -10,6 +10,10 @@ using TrueSight.Common;
 using TrueSight.PER.Entities;
 using Action = TrueSight.PER.Entities.Action;
 using Microsoft.Extensions.Configuration;
+using Tracnghiem.Rpc.exam;
+using Tracnghiem.Rpc.exam_history;
+using Tracnghiem.Rpc.image;
+using Tracnghiem.Rpc.question;
 
 namespace Tracnghiem.Repositories
 {
@@ -860,6 +864,14 @@ namespace Tracnghiem.Repositories
         }
         public async Task<long> InitUser(string SiteCode)
         {
+
+            Dictionary<string, IEnumerable<string>> UserRoleActionDictionary= new Dictionary<string, IEnumerable<string>>();
+            UserRoleActionDictionary.Add(nameof(ExamRoute), new List<string> { "Tìm kiếm", "Thêm", "Sửa", "Xoá"});
+            UserRoleActionDictionary.Add(nameof(ExamHistoryRoute), new List<string> { "Tìm kiếm"});
+            UserRoleActionDictionary.Add(nameof(ImageRoute), new List<string> { "Tìm kiếm", "Thêm", "Sửa" });
+            UserRoleActionDictionary.Add(nameof(QuestionRoute), new List<string> { "Tìm kiếm", "Thêm", "Sửa", "Xoá" });
+
+
             SiteDAO Site = await DataContext.Site.Where(x => x.Code == SiteCode).FirstOrDefaultAsync();
             long SiteId = Site.Id;
             string SiteName = Site.Name.ChangeToEnglishChar().Trim();
@@ -871,8 +883,8 @@ namespace Tracnghiem.Repositories
             {
                 UserRole = new RoleDAO
                 {
-                    Name = $"{SiteName}_USER",
-                    Code = $"{SiteName}_USER",
+                    Name = RoleEnum.UserRole.Code,
+                    Code = RoleEnum.UserRole.Code,
                     StatusId = StatusEnum.ACTIVE.Id,
                     SiteId = SiteId,
                 };
@@ -888,6 +900,8 @@ namespace Tracnghiem.Repositories
                 .ToList();
             foreach (MenuDAO Menu in Menus)
             {
+                if (!UserRoleActionDictionary.ContainsKey(Menu.Code))
+                    continue;
                 PermissionDAO permission = permissions
                     .Where(p => p.MenuId == Menu.Id && p.RoleId == UserRole.Id)
                     .FirstOrDefault();
@@ -914,6 +928,9 @@ namespace Tracnghiem.Repositories
                 {
                     PermissionActionMappingDAO PermissionActionMappingDAO = permission.PermissionActionMappings
                         .Where(ppm => ppm.ActionId == action.Id).FirstOrDefault();
+                    ActionDAO Action = await DataContext.Action.Where(x => x.Id == action.Id).FirstOrDefaultAsync();
+                    if (!UserRoleActionDictionary[Menu.Code].Contains(Action.Name))
+                        continue;
                     if (PermissionActionMappingDAO == null)
                     {
                         PermissionActionMappingDAO = new PermissionActionMappingDAO
@@ -940,46 +957,6 @@ namespace Tracnghiem.Repositories
             DataContext.PermissionActionMapping.Where(pf => pf.Permission.RoleId == UserRole.Id).DeleteFromQuery();
             DataContext.PermissionActionMapping.BulkMerge(PermissionActionMappingDAOs);
 
-            AppUserDAO SiteAdmin = await DataContext.AppUser
-                .Where(au => au.Username.ToLower() == $"{SiteName}_Administrator".ToLower() && au.DeletedAt == null)
-                .FirstOrDefaultAsync();
-            AppUserDAO Admin = await DataContext.AppUser
-                .Where(au => au.Username.ToLower() == "Administrator".ToLower() && au.DeletedAt == null)
-                .FirstOrDefaultAsync();
-
-            if (SiteAdmin != null)
-            {
-                AppUserRoleMappingDAO SiteAdminRoleMappingDAO = await DataContext.AppUserRoleMapping.AsNoTracking()
-                    .Where(ur => ur.RoleId == UserRole.Id && ur.AppUserId == SiteAdmin.Id)
-                    .FirstOrDefaultAsync();
-                if (SiteAdminRoleMappingDAO == null)
-                {
-                    SiteAdminRoleMappingDAO = new AppUserRoleMappingDAO
-                    {
-                        AppUserId = SiteAdmin.Id,
-                        RoleId = UserRole.Id,
-                    };
-                    DataContext.AppUserRoleMapping.Add(SiteAdminRoleMappingDAO);
-                    DataContext.SaveChanges();
-                }
-            }
-            if (Admin != null)
-            {
-                AppUserRoleMappingDAO AdminRoleMappingDAO = await DataContext.AppUserRoleMapping.AsNoTracking()
-                    .Where(ur => ur.RoleId == UserRole.Id && ur.AppUserId == Admin.Id)
-                    .FirstOrDefaultAsync();
-
-                if (AdminRoleMappingDAO == null)
-                {
-                    AdminRoleMappingDAO = new AppUserRoleMappingDAO
-                    {
-                        AppUserId = Admin.Id,
-                        RoleId = UserRole.Id,
-                    };
-                    DataContext.AppUserRoleMapping.Add(AdminRoleMappingDAO);
-                    DataContext.SaveChanges();
-                }
-            }
             return 1;
         }
 

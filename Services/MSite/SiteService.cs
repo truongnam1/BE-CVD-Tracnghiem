@@ -158,7 +158,7 @@ namespace Tracnghiem.Services.MSite
                 await UOW.MenuRepository.BulkMerge(Site);
                 //await UOW.FieldEntityRepository.UpdateFieldName();
                 var RoleAdminId = await UOW.RoleRepository.InitAdmin(Site.Code);
-
+                var RoleUserId = await UOW.RoleRepository.InitUser(Site.Code);
                 Site = await UOW.SiteRepository.Get(oldSites[0].Id);
 
                 List<Role> Roles = await UOW.RoleRepository.List(new List<long> { RoleAdminId });
