@@ -1,8 +1,9 @@
 ﻿using System;
+using TrueSight.Common;
 
 namespace Tracnghiem.Entities
 {
-    public class Mail
+    public class Mail : DataEntity
     {
         public Guid Id { get; set; }
         public string RecipientDisplayName { get; set; }

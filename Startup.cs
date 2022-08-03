@@ -36,6 +36,7 @@ using Tracnghiem.Rpc;
 using Tracnghiem.Services;
 using Tracnghiem.Repositories;
 using Tracnghiem.Enums;
+using Tracnghiem.Handlers.Configuration;
 
 namespace Tracnghiem
 {
@@ -76,9 +77,9 @@ namespace Tracnghiem
 
             services.AddSingleton<IRedisStore, RedisStore>();
             services.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
-            //services.AddSingleton<IPooledObjectPolicy<IModel>, RabbitModelPooledObjectPolicy>();
-            //services.AddSingleton<IRabbitManager, RabbitManager>();
-            //services.AddHostedService<ConsumeRabbitMQHostedService>();
+            services.AddSingleton<IPooledObjectPolicy<IModel>, RabbitModelPooledObjectPolicy>();
+            services.AddSingleton<IRabbitManager, RabbitManager>();
+            services.AddHostedService<ConsumeRabbitMQHostedService>();
 
             services.AddDbContext<DataContext>(options =>
             {
