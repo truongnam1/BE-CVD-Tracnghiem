@@ -1,4 +1,4 @@
-using TrueSight.Common;
+﻿using TrueSight.Common;
 using Tracnghiem.Common;
 using Tracnghiem.Helpers;
 using TrueSight.PER.Entities;
@@ -21,6 +21,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using Tracnghiem.Services.MMail;
 
 namespace Tracnghiem.Services.MAppUser
 {
@@ -40,6 +41,7 @@ namespace Tracnghiem.Services.MAppUser
         Task<AppUser> ChangePassword(AppUser AppUser);
         Task<AppUser> ForgotPassword(AppUser AppUser);
         Task<AppUser> RecoveryPassword(AppUser AppUser);
+        Task<AppUser> RecoveryPasswordByOTP(AppUser AppUser);
         Task<AppUser> AdminChangePassword(AppUser AppUser);
         Task<AppUser> RefreshToken(AppUser AppUser);
 
@@ -52,6 +54,7 @@ namespace Tracnghiem.Services.MAppUser
         private ILogging Logging;
         private ICurrentContext CurrentContext;
         private IConfiguration Configuration;
+        private IMailService MailService;
 
         private IAppUserValidator AppUserValidator;
 
@@ -60,7 +63,8 @@ namespace Tracnghiem.Services.MAppUser
             ICurrentContext CurrentContext,
             IAppUserValidator AppUserValidator,
             ILogging Logging,
-            IConfiguration Configuration
+            IConfiguration Configuration,
+            IMailService MailService
 
         )
         {
@@ -68,6 +72,7 @@ namespace Tracnghiem.Services.MAppUser
             this.CurrentContext = CurrentContext;
             this.Logging = Logging;
             this.Configuration = Configuration;
+            this.MailService = MailService;
            
             this.AppUserValidator = AppUserValidator;
         }
@@ -143,6 +148,7 @@ namespace Tracnghiem.Services.MAppUser
 
         public async Task<AppUser> UserCreate(AppUser AppUser)
         {
+
             if (!await AppUserValidator.Create(AppUser))
                 return AppUser;
 
@@ -153,18 +159,6 @@ namespace Tracnghiem.Services.MAppUser
                 AppUser.Password = HashPassword(AppUser.Password);
 
                 await UOW.AppUserRepository.Create(AppUser);
-
-                //List<Role> Roles = await UOW.RoleRepository.List(new RoleFilter
-                //{
-                //    Code = new StringFilter
-                //    {
-                //        Equal = RoleEnum.UserRole.Code
-                //    },
-                //    Skip = 0,
-                //    Take = 1,
-                //    Selects = RoleSelect.ALL
-                //});
-                //Role Role = Roles.FirstOrDefault();
                 Role Role = (await UOW.RoleRepository.List(new RoleFilter
                 {
                     Code = new StringFilter
@@ -189,13 +183,15 @@ namespace Tracnghiem.Services.MAppUser
                 AppUser = await Get(AppUser.Id);
 
 
-                //Mail mail = new Mail
-                //{
-                //    Subject = "Create AppUser",
-                //    Body = $"Your account has been created at {StaticParams.DateTimeNow.AddHours(7).ToString("HH:mm:ss dd-MM-yyyy")} Username: {AppUser.Username} Password: {Password}",
-                //    Recipients = new List<string> { AppUser.Email },
-                //    RowId = Guid.NewGuid()
-                //};
+                Mail mail = new Mail
+                {
+                    Subject = "Đăng ký tài khoản thành công",
+                    Body = $"Chúc mừng bạn {AppUser.DisplayName} đă đăng ký tài khoản thành công vào lúc {StaticParams.DateTimeNow.AddHours(7).ToString("HH:mm:ss dd-MM-yyyy")}!",
+                    RecipientDisplayName = AppUser.DisplayName,
+                    RecipientEmail = AppUser.Email,
+                    Id = Guid.NewGuid()
+                };
+                await MailService.SendEmails(new List<Mail> { mail });
                 //RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
                 return AppUser;
             }
@@ -331,36 +327,38 @@ namespace Tracnghiem.Services.MAppUser
         }
         public async Task<AppUser> ForgotPassword(AppUser AppUser)
         {
-            //if (!await AppUserValidator.ForgotPassword(AppUser))
-            //    return AppUser;
+            int TimeOTPExpired = 5;
+            if (!await AppUserValidator.ForgotPassword(AppUser))
+                return AppUser;
             try
             {
                 AppUser oldData = (await UOW.AppUserRepository.List(new AppUserFilter
                 {
                     Skip = 0,
                     Take = 1,
+                    Email = new StringFilter { Equal = AppUser.Email},
                     Selects = AppUserSelect.ALL
                 })).FirstOrDefault();
 
                 CurrentContext.UserId = oldData.Id;
 
                 oldData.OtpCode = GenerateOTPCode();
-                oldData.OtpExpired = StaticParams.DateTimeNow.AddMinutes(5);
+                oldData.OtpExpired = StaticParams.DateTimeNow.AddMinutes(TimeOTPExpired);
 
 
                 await UOW.AppUserRepository.Update(oldData);
 
-
                 var newData = await UOW.AppUserRepository.Get(oldData.Id);
 
-                //Mail mail = new Mail
-                //{
-                //    Subject = "Otp Code",
-                //    Body = $"Otp Code recovery password: {newData.OtpCode}",
-                //    Recipients = new List<string> { newData.Email },
-                //    RowId = Guid.NewGuid()
-                //};
-                //RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+                Mail mail = new Mail
+                {
+                    Subject = "Mã khôi phục mật khẩu",
+                    Body = $"Mã khôi phục mật khẩu là <strong>{newData.OtpCode}</strong>, mã sẽ hết hạn trong {TimeOTPExpired} phút, lúc {newData.OtpExpired?.ToString("HH:mm:ss dd-MM-yyyy")}",
+                    RecipientDisplayName = newData.DisplayName,
+                    RecipientEmail = newData.Email,
+                    Id = Guid.NewGuid()
+                };
+                await MailService.SendEmails(new List<Mail> { mail });
                 return newData;
             }
             catch (Exception ex)
@@ -400,6 +398,37 @@ namespace Tracnghiem.Services.MAppUser
             }
             return null;
         }
+        public async Task<AppUser> RecoveryPasswordByOTP(AppUser AppUser)
+        {
+            if (!await AppUserValidator.RecoveryPasswordByOTP(AppUser))
+            {
+                return AppUser;
+            }
+            try
+            {
+                AppUserFilter AppUserFilter = new AppUserFilter();
+                AppUserFilter.Email = new StringFilter { Equal = AppUser.Email };
+                AppUserFilter.Skip = 0;
+                AppUserFilter.Take = 1;
+                AppUserFilter.Selects = AppUserSelect.Id;
+                
+                var AppUsers = await UOW.AppUserRepository.List(AppUserFilter);
+                AppUser = AppUsers.FirstOrDefault();
+                AppUser = await UOW.AppUserRepository.Get(AppUser.Id);
+                CurrentContext.UserId = AppUser.Id;
+                AppUser.Token = CreateToken(AppUser.Id, AppUser.Username);
+                AppUser.RefreshToken = CreateRefreshToken(AppUser);
+                return AppUser;
+
+            }
+            catch (Exception ex)
+            {
+                Logging.CreateSystemLog(ex, nameof(AppUserService));
+            }
+
+            return null;
+        }
+
         public async Task<AppUser> AdminChangePassword(AppUser AppUser)
         {
             //if (!await AppUserValidator.AdminChangePassword(AppUser))

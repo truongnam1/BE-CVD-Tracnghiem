@@ -91,14 +91,26 @@ namespace Tracnghiem.Rpc
         // role mặc định của người dùng khi đăng ký
         private async Task InitUserRole()
         {
-            RoleDAO RoleDAO = new RoleDAO();
-            RoleDAO.Code = RoleEnum.UserRole.Code;
-            RoleDAO.Name = RoleEnum.UserRole.Name;
-            RoleDAO.StatusId = 1;
-            RoleDAO.SiteId = SiteEnum.Tracnghiem.Id;
-            RoleDAO.IsDeleted = false;
+            RoleDAO RoleDAO = DataContext.Role.Where(x => x.Code == RoleEnum.UserRole.Code).FirstOrDefault();
+            if (RoleDAO == null)
+            {
+                RoleDAO = new RoleDAO();
+                RoleDAO.Code = RoleEnum.UserRole.Code;
+                RoleDAO.Name = RoleEnum.UserRole.Name;
+                RoleDAO.StatusId = 1;
+                RoleDAO.SiteId = SiteEnum.Tracnghiem.Id;
+                RoleDAO.IsDeleted = false;
+                DataContext.Role.Add(RoleDAO);
+            }
+            else
+            {
+                RoleDAO.Code = RoleEnum.UserRole.Code;
+                RoleDAO.Name = RoleEnum.UserRole.Name;
+                RoleDAO.StatusId = 1;
+                RoleDAO.SiteId = SiteEnum.Tracnghiem.Id;
+                RoleDAO.IsDeleted = false;
+            }
 
-            DataContext.Role.Add(RoleDAO);
             await DataContext.SaveChangesAsync();
 
         }
