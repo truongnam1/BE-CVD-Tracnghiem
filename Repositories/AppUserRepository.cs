@@ -43,6 +43,8 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.Username, filter.Username);
             query = query.Where(q => q.DisplayName, filter.DisplayName);
             query = query.Where(q => q.Email, filter.Email);
+            query = query.Where(q => q.OtpCode, filter.OtpCode);
+            query = query.Where(q => q.OtpExpired, filter.OtpExpired);
             query = query.Where(q => q.Password, filter.Password);
             query = query.Where(q => q.RefreshToken, filter.RefreshToken);
             query = query.Where(q => q.ImageId, filter.ImageId);
@@ -62,6 +64,8 @@ namespace Tracnghiem.Repositories
                 queryable = queryable.Where(q => q.Username, AppUserFilter.Username);
                 queryable = queryable.Where(q => q.DisplayName, AppUserFilter.DisplayName);
                 queryable = queryable.Where(q => q.Password, AppUserFilter.Password);
+                queryable = queryable.Where(q => q.OtpCode, AppUserFilter.OtpCode);
+                queryable = queryable.Where(q => q.OtpExpired, AppUserFilter.OtpExpired);
                 queryable = queryable.Where(q => q.RefreshToken, AppUserFilter.RefreshToken);
                 queryable = queryable.Where(q => q.ImageId, AppUserFilter.ImageId);
                 initQuery = initQuery.Union(queryable);
@@ -131,8 +135,11 @@ namespace Tracnghiem.Repositories
                 Id = filter.Selects.Contains(AppUserSelect.Id) ? q.Id : default(long),
                 Username = filter.Selects.Contains(AppUserSelect.Username) ? q.Username : default(string),
                 DisplayName = filter.Selects.Contains(AppUserSelect.DisplayName) ? q.DisplayName : default(string),
+                Email = filter.Selects.Contains(AppUserSelect.Email) ? q.Email : default(string),
                 Password = filter.Selects.Contains(AppUserSelect.Password) ? q.Password : default(string),
                 RefreshToken = filter.Selects.Contains(AppUserSelect.RefreshToken) ? q.RefreshToken : default(string),
+                OtpCode = filter.Selects.Contains(AppUserSelect.OtpCode) ? q.OtpCode : default(string),
+                OtpExpired = filter.Selects.Contains(AppUserSelect.OtpExpired) ? q.OtpExpired : default(DateTime?),
                 ImageId = filter.Selects.Contains(AppUserSelect.Image) ? q.ImageId : default(long?),
                 Image = filter.Selects.Contains(AppUserSelect.Image) && q.Image != null ? new Image
                 {
@@ -182,8 +189,11 @@ namespace Tracnghiem.Repositories
                 Id = x.Id,
                 Username = x.Username,
                 DisplayName = x.DisplayName,
+                Email = x.Email,
                 Password = x.Password,
                 RefreshToken = x.RefreshToken,
+                OtpCode = x.OtpCode,
+                OtpExpired = x.OtpExpired,
                 ImageId = x.ImageId,
                 Image = x.Image == null ? null : new Image
                 {
@@ -244,7 +254,10 @@ namespace Tracnghiem.Repositories
                 Id = x.Id,
                 Username = x.Username,
                 DisplayName = x.DisplayName,
+                Email = x.Email,
                 Password = x.Password,
+                OtpCode = x.OtpCode,
+                OtpExpired = x.OtpExpired,
                 RefreshToken = x.RefreshToken,
                 ImageId = x.ImageId,
                 Image = x.Image == null ? null : new Image
@@ -297,6 +310,8 @@ namespace Tracnghiem.Repositories
             AppUserDAO.DisplayName = AppUser.DisplayName;
             AppUserDAO.Email = AppUser.Email;
             AppUserDAO.Password = AppUser.Password;
+            AppUserDAO.OtpCode = AppUser.OtpCode;
+            AppUserDAO.OtpExpired = AppUser.OtpExpired;
             AppUserDAO.RefreshToken = AppUser.RefreshToken;
             AppUserDAO.ImageId = AppUser.ImageId;
             AppUserDAO.CreatedAt = StaticParams.DateTimeNow;
@@ -319,6 +334,9 @@ namespace Tracnghiem.Repositories
             AppUserDAO.Id = AppUser.Id;
             AppUserDAO.Username = AppUser.Username;
             AppUserDAO.DisplayName = AppUser.DisplayName;
+            AppUserDAO.Email = AppUser.Email;
+            AppUserDAO.OtpCode = AppUser.OtpCode;
+            AppUserDAO.OtpExpired = AppUser.OtpExpired;
             AppUserDAO.Password = AppUser.Password;
             AppUserDAO.RefreshToken = AppUser.RefreshToken;
             AppUserDAO.ImageId = AppUser.ImageId;
@@ -359,6 +377,7 @@ namespace Tracnghiem.Repositories
                 }
                 AppUserDAO.Username = AppUser.Username;
                 AppUserDAO.DisplayName = AppUser.DisplayName;
+                AppUserDAO.Email = AppUser.Email;
                 AppUserDAO.Password = AppUser.Password;
                 AppUserDAO.RefreshToken = AppUser.RefreshToken;
                 AppUserDAO.ImageId = AppUser.ImageId;

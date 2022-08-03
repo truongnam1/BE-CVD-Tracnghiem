@@ -124,6 +124,10 @@ namespace Tracnghiem.Models
                     .IsRequired()
                     .HasMaxLength(500);
 
+                entity.Property(e => e.OtpCode).HasMaxLength(500);
+
+                entity.Property(e => e.OtpExpired).HasColumnType("datetime");
+
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(4000);

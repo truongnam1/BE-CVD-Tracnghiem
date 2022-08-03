@@ -21,6 +21,7 @@ namespace Tracnghiem.Services.MAppUser
         public enum Error
         {
             IdNotExisted,
+            ObjectNotExisted,
             ObjectUsed,
             CodeHasSpecialCharacter,
             CodeExisted,
@@ -62,6 +63,7 @@ namespace Tracnghiem.Services.MAppUser
             ProvinceEmpty,
             EmailNotExisted,
             OtpCodeInvalid,
+            OtpCodeEmpty,
             OtpExpired,
             PositionIdNotExisted,
             PositionEmpty,

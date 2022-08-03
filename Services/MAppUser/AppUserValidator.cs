@@ -23,6 +23,8 @@ namespace Tracnghiem.Services.MAppUser
         Task<bool> Login(AppUser AppUser);
         Task<bool> ChangePassword(AppUser AppUser);
         Task<bool> ForgotPassword(AppUser AppUser);
+        Task<bool> VerifyOTP(AppUser AppUser);
+        Task<bool> RecoveryPasswordByOTP(AppUser AppUser);
         Task<bool> AdminChangePassword(AppUser AppUser);
         Task<bool> RefreshToken(AppUser AppUser);
         Task<bool> BulkDelete(List<AppUser> AppUsers);
@@ -139,6 +141,41 @@ namespace Tracnghiem.Services.MAppUser
             return AppUser.IsValidated;
         }
 
+        public async Task<bool> VerifyOTP(AppUser AppUser)
+        {
+
+            AppUserFilter AppUserFilter = new AppUserFilter();
+            AppUserFilter.Skip = 0;
+            AppUserFilter.Take = 10;
+            AppUserFilter.Email = new StringFilter { Equal = AppUser.Email };
+            AppUserFilter.Selects = AppUserSelect.Id;
+            List<AppUser> AppUsers = await UOW.AppUserRepository.List(AppUserFilter);
+            AppUser AppUserTemp = AppUsers?.FirstOrDefault();
+            if (AppUserTemp == null)
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Id), AppUserMessage.Error.ObjectNotExisted, AppUserMessage);
+            }
+            else
+            {
+                AppUserTemp = await UOW.AppUserRepository.Get(AppUserTemp.Id);
+                if (string.IsNullOrEmpty(AppUser.OtpCode))
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.OtpCode), AppUserMessage.Error.OtpCodeEmpty, AppUserMessage);
+
+                } 
+                else if (AppUserTemp.OtpExpired < StaticParams.DateTimeNow)
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.OtpExpired), AppUserMessage.Error.OtpExpired, AppUserMessage);
+
+                }
+                else if (AppUserTemp.OtpCode != AppUser.OtpCode)
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.OtpCode), AppUserMessage.Error.OtpCodeInvalid, AppUserMessage);
+
+                }
+            }
+            return AppUser.IsValidated;
+        }
 
         private async Task<bool> ValidateUsername(AppUser AppUser)
         {
@@ -342,9 +379,60 @@ namespace Tracnghiem.Services.MAppUser
             throw new NotImplementedException();
         }
 
-        public Task<bool> ForgotPassword(AppUser AppUser)
+        public async Task<bool> ForgotPassword(AppUser AppUser)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(AppUser.Email))
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailEmpty);
+            else if (!IsValidEmail(AppUser.Email))
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailInvalid);
+            else
+            {
+                if (AppUser.Email.Length > 255)
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailOverLength);
+                AppUserFilter AppUserFilter = new AppUserFilter
+                {
+                    Skip = 0,
+                    Take = 1,
+                    Email = new StringFilter { Equal = AppUser.Email },
+                    Selects = AppUserSelect.Email
+                };
+
+                int count = await UOW.AppUserRepository.CountAll(AppUserFilter);
+                if (count == 0)
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailNotExisted);
+            }
+            return AppUser.IsValidated;
+        }
+        public async Task<bool> RecoveryPasswordByOTP(AppUser AppUser)
+        {
+            #region Email
+            if (string.IsNullOrWhiteSpace(AppUser.Email))
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailEmpty);
+            else if (!IsValidEmail(AppUser.Email))
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailInvalid);
+            else
+            {
+                if (AppUser.Email.Length > 255)
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailOverLength);
+                AppUserFilter AppUserFilter = new AppUserFilter
+                {
+                    Skip = 0,
+                    Take = 10,
+                    Email = new StringFilter { Equal = AppUser.Email },
+                    Selects = AppUserSelect.Email
+                };
+
+                int count = await UOW.AppUserRepository.CountAll(AppUserFilter);
+                if (count == 0)
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Email), AppUserMessage.Error.EmailNotExisted);
+
+            }
+            #endregion
+
+            await VerifyOTP(AppUser);
+
+            
+            return AppUser.IsValidated;
         }
 
         public Task<bool> AdminChangePassword(AppUser AppUser)

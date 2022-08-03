@@ -72,6 +72,8 @@ namespace Tracnghiem.Entities
         public StringFilter RefreshToken { get; set; }
         public IdFilter RoleId { get; set; }
         public IdFilter ImageId { get; set; }
+        public StringFilter OtpCode { get; set; }
+        public DateFilter OtpExpired { get; set; }
         public List<AppUserFilter> OrFilter { get; set; }
         public AppUserOrder OrderBy {get; set;}
         public AppUserSelect Selects {get; set;}
@@ -89,6 +91,7 @@ namespace Tracnghiem.Entities
         Role = 5,
         Image = 6,
         Email = 7,
+       
     }
 
     [Flags]
@@ -103,6 +106,8 @@ namespace Tracnghiem.Entities
         Role = E._5,
         Image = E._6,
         Email = E._7,
+        OtpCode = E._8,
+        OtpExpired = E._9
     }
 
     [Flags]

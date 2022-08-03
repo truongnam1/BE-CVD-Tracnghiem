@@ -27,6 +27,7 @@ namespace Tracnghiem.Rpc.app_user
         public const string Update = "rpc/tracnghiem/profile/update";
         public const string SaveImage = "rpc/tracnghiem/profile/save-image";
         public const string ChangePassword = "rpc/tracnghiem/profile/change-password";
+        public const string RecoveryPasswordByOTP = "rpc/tracnghiem/profile/recovery-password-by-otp";
         public const string ForgotPassword = "rpc/tracnghiem/profile/forgot-password";
         public const string VerifyOtpCode = "rpc/tracnghiem/profile/verify-otp-code";
         public const string RecoveryPassword = "rpc/tracnghiem/profile/recovery-password";
@@ -146,7 +147,7 @@ namespace Tracnghiem.Rpc.app_user
         #region Forgot Password
         [AllowAnonymous]
         [Route(ProfileRoot.ForgotPassword), HttpPost]
-        public async Task<ActionResult<AppUser_AppUserDTO>> ForgotPassword([FromBody] AppUser_ForgotPassword AppUser_ForgotPassword)
+        public async Task<ActionResult<AppUser_ForgotPassword>> ForgotPassword([FromBody] AppUser_ForgotPassword AppUser_ForgotPassword)
         {
             if (!ModelState.IsValid)
                 throw new BindException(ModelState);
@@ -158,14 +159,43 @@ namespace Tracnghiem.Rpc.app_user
             AppUser.BaseLanguage = CurrentContext.Language;
 
             AppUser = await AppUserService.ForgotPassword(AppUser);
-            AppUser_AppUserDTO AppUser_AppUserDTO = new AppUser_AppUserDTO(AppUser);
+            AppUser_ForgotPassword = new AppUser_ForgotPassword(AppUser);
             if (AppUser.IsValidated)
             {
+                return AppUser_ForgotPassword;
+            }
+            else
+                return BadRequest(AppUser_ForgotPassword);
+        }
+
+        [AllowAnonymous]
+        [Route(ProfileRoot.RecoveryPasswordByOTP), HttpPost]
+        public async Task<ActionResult<AppUser_AppUserDTO>> RecoveryPasswordByOTP([FromBody] AppUser_RecoveryPasswordByOTPDTO AppUser_RecoveryPasswordByOTPDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+            AppUser AppUser = new AppUser
+            {
+                Email = AppUser_RecoveryPasswordByOTPDTO.Email,
+                OtpCode = AppUser_RecoveryPasswordByOTPDTO.OtpCode,
+                BaseLanguage = "vi",
+            };
+            AppUser.BaseLanguage = CurrentContext.Language;
+            AppUser = await AppUserService.RecoveryPasswordByOTP(AppUser);
+            AppUser_AppUserDTO AppUser_AppUserDTO = new AppUser_AppUserDTO(AppUser);
+
+            if (AppUser.IsValidated)
+            {
+                Response.Cookies.Append("Token", AppUser.Token);
+                Response.Cookies.Append("RefreshToken", AppUser.RefreshToken);
+                AppUser_AppUserDTO.Token = AppUser.Token;
+                AppUser_AppUserDTO.RefreshToken = AppUser.RefreshToken;
                 return AppUser_AppUserDTO;
             }
             else
                 return BadRequest(AppUser_AppUserDTO);
         }
+
 
         [Route(ProfileRoot.RecoveryPassword), HttpPost]
         public async Task<ActionResult<AppUser_AppUserDTO>> RecoveryPassword([FromBody] AppUser_RecoveryPassword AppUser_RecoveryPassword)

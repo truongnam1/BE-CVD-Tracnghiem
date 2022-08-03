@@ -23,6 +23,8 @@ namespace Tracnghiem.Models
         public DateTime UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
         public long StatusId { get; set; }
+        public string OtpCode { get; set; }
+        public DateTime? OtpExpired { get; set; }
 
         public virtual ImageDAO Image { get; set; }
         public virtual StatusDAO Status { get; set; }
