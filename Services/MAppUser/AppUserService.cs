@@ -22,6 +22,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Tracnghiem.Services.MMail;
+using Tracnghiem.Handlers.Configuration;
 
 namespace Tracnghiem.Services.MAppUser
 {
@@ -55,6 +56,7 @@ namespace Tracnghiem.Services.MAppUser
         private ICurrentContext CurrentContext;
         private IConfiguration Configuration;
         private IMailService MailService;
+        private IRabbitManager RabbitManager;
 
         private IAppUserValidator AppUserValidator;
 
@@ -64,7 +66,8 @@ namespace Tracnghiem.Services.MAppUser
             IAppUserValidator AppUserValidator,
             ILogging Logging,
             IConfiguration Configuration,
-            IMailService MailService
+            IMailService MailService,
+            IRabbitManager RabbitManager
 
         )
         {
@@ -73,6 +76,7 @@ namespace Tracnghiem.Services.MAppUser
             this.Logging = Logging;
             this.Configuration = Configuration;
             this.MailService = MailService;
+            this.RabbitManager = RabbitManager;
            
             this.AppUserValidator = AppUserValidator;
         }
@@ -191,8 +195,8 @@ namespace Tracnghiem.Services.MAppUser
                     RecipientEmail = AppUser.Email,
                     Id = Guid.NewGuid()
                 };
-                await MailService.SendEmails(new List<Mail> { mail });
-                //RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+                //await MailService.SendEmails(new List<Mail> { mail });
+                RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
                 return AppUser;
             }
             catch (Exception ex)
@@ -201,9 +205,6 @@ namespace Tracnghiem.Services.MAppUser
             }
             return null;
         }
-
-
-
         public async Task<AppUser> Update(AppUser AppUser)
         {
             if (!await AppUserValidator.Update(AppUser))
@@ -358,7 +359,9 @@ namespace Tracnghiem.Services.MAppUser
                     RecipientEmail = newData.Email,
                     Id = Guid.NewGuid()
                 };
-                await MailService.SendEmails(new List<Mail> { mail });
+                //await MailService.SendEmails(new List<Mail> { mail });
+                RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+
                 return newData;
             }
             catch (Exception ex)

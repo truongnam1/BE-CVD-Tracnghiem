@@ -7,6 +7,8 @@ namespace Tracnghiem.Enums
     {
         public static GenericEnum MenuSend = new GenericEnum(Id: 1, Code: "Menu.Send", Name: "Menu Send");
         public static GenericEnum RoleSend = new GenericEnum(Id: 2, Code: "Role.Send", Name: "Role Send");
+        public static GenericEnum MailSend = new GenericEnum(Id: 3, Code: "Mail.Send", Name: "Mail Send");
+
         public static GenericEnum MasterEntityRegister = new GenericEnum(Id: 3, Code: "MasterEntity.Register", Name: "MasterEntiry Register");
         public static GenericEnum AuditLogSend = new GenericEnum (Id : 5, Code : "AuditLog.Send", Name : "Audit Log");
         public static GenericEnum SystemLogSend = new GenericEnum (Id : 6, Code : "SystemLog.Send", Name : "System Log");
