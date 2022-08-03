@@ -14,6 +14,7 @@ using Tracnghiem.Rpc.exam;
 using Tracnghiem.Rpc.exam_history;
 using Tracnghiem.Rpc.image;
 using Tracnghiem.Rpc.question;
+using Tracnghiem.Rpc.app_user;
 
 namespace Tracnghiem.Repositories
 {
@@ -870,6 +871,7 @@ namespace Tracnghiem.Repositories
             UserRoleActionDictionary.Add(nameof(ExamHistoryRoute), new List<string> { "Tìm kiếm"});
             UserRoleActionDictionary.Add(nameof(ImageRoute), new List<string> { "Tìm kiếm", "Thêm", "Sửa" });
             UserRoleActionDictionary.Add(nameof(QuestionRoute), new List<string> { "Tìm kiếm", "Thêm", "Sửa", "Xoá" });
+            UserRoleActionDictionary.Add(nameof(ProfileRoute), new List<string> { "Đăng nhập", "Đổi mật khẩu" });
 
 
             SiteDAO Site = await DataContext.Site.Where(x => x.Code == SiteCode).FirstOrDefaultAsync();
