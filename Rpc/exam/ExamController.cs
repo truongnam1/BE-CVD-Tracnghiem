@@ -266,7 +266,7 @@ namespace Tracnghiem.Rpc.exam
         }
 
         [Route(ExamRoute.SubmitExam), HttpPost]
-        public async Task<ActionResult<Exam_ExamHistoryDTO>> SubmitExam(Exam_ExamDTO Exam_ExamDTO)
+        public async Task<ActionResult<Exam_ExamHistoryDTO>> SubmitExam([FromBody] Exam_ExamDTO Exam_ExamDTO)
         {
             if (!ModelState.IsValid)
                 throw new BindException(ModelState);
@@ -450,55 +450,7 @@ namespace Tracnghiem.Rpc.exam
                 }
                 return BadRequest(Errors);
             }
-        }
-        
-        [Route(ExamRoute.Export), HttpPost]
-        public async Task<ActionResult> Export([FromBody] Exam_ExamFilterDTO Exam_ExamFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            var ExamFilter = ConvertFilterDTOToFilterEntity(Exam_ExamFilterDTO);
-            ExamFilter.Skip = 0;
-            ExamFilter.Take = int.MaxValue;
-            ExamFilter = await ExamService.ToFilter(ExamFilter);
-            List<Exam> Exams = await ExamService.List(ExamFilter);
-            List<Exam_ExamExportDTO> Exam_ExamExportDTOs = Exams.Select(x => new Exam_ExamExportDTO(x)).ToList();  
-            var STT = 1;
-            foreach (var Exam_ExamExportDTO in Exam_ExamExportDTOs)
-            {
-                Exam_ExamExportDTO.STT = STT++;
-            }
-            string path = "Templates/Exam_Export.xlsx";
-            byte[] arr = System.IO.File.ReadAllBytes(path);
-            MemoryStream input = new MemoryStream(arr);
-            MemoryStream output = new MemoryStream();
-            dynamic Data = new ExpandoObject();            
-            Data.Data = Exam_ExamExportDTOs;
-            using (var document = StaticParams.DocumentFactory.Open(input, output, "xlsx"))
-            {    
-                document.Process(Data);
-            }
-            return File(output.ToArray(), "application/octet-stream", "Exam.xlsx");
-        }
-
-        [Route(ExamRoute.ExportTemplate), HttpPost]
-        public async Task<ActionResult> ExportTemplate([FromBody] Exam_ExamFilterDTO Exam_ExamFilterDTO)
-        {
-            if (!ModelState.IsValid)
-                throw new BindException(ModelState);
-            
-            string path = "Templates/Exam_Template.xlsx";
-            byte[] arr = System.IO.File.ReadAllBytes(path);
-            MemoryStream input = new MemoryStream(arr);
-            MemoryStream output = new MemoryStream();
-            dynamic Data = new ExpandoObject();
-            using (var document = StaticParams.DocumentFactory.Open(input, output, "xlsx"))
-            {
-                document.Process(Data);
-            };
-            return File(output.ToArray(), "application/octet-stream", "Exam.xlsx");
-        }
+        }    
 
         [Route(ExamRoute.UploadImage), HttpPost]
         public async Task<ActionResult<Exam_ImageDTO>> UploadImage(IFormFile file)
@@ -614,17 +566,21 @@ namespace Tracnghiem.Rpc.exam
                     },
                 }).ToList();
             var QuestionContentDTOs = Exam_ExamDTO.ExamQuestionMappings?.SelectMany(x => x.Question.QuestionContents).ToList();
-            var QuestionContents = QuestionContentDTOs.Select(x => new QuestionContent
+            if (QuestionContentDTOs != null)
             {
-                Id = x.Id,
-                IsRight = x.IsRight,
-                QuestionId = x.QuestionId,
-                AnswerContent = x.AnswerContent
-            }).ToList(); 
+                var QuestionContents = QuestionContentDTOs.Select(x => new QuestionContent
+                {
+                    Id = x.Id,
+                    IsRight = x.IsRight,
+                    QuestionId = x.QuestionId,
+                    AnswerContent = x.AnswerContent
+                }).ToList(); 
 
-            foreach (ExamQuestionMapping ExamQuestionMapping in Exam.ExamQuestionMappings)
-            {
-                ExamQuestionMapping.Question.QuestionContents = QuestionContents.Where(x => x.QuestionId == ExamQuestionMapping.QuestionId).ToList();
+                foreach (ExamQuestionMapping ExamQuestionMapping in Exam.ExamQuestionMappings)
+                {
+                    ExamQuestionMapping.Question.QuestionContents = QuestionContents.Where(x => x.QuestionId == ExamQuestionMapping.QuestionId).ToList();
+                }
+
             }
             Exam.BaseLanguage = CurrentContext.Language;
             return Exam;
