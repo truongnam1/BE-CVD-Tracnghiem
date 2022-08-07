@@ -45,6 +45,8 @@ namespace Tracnghiem.Rpc.exam
         public const string Send = Default + "/send";
         public const string ExportTemplate = Default + "/export-template";
         public const string BulkDelete = Default + "/bulk-delete";
+        public const string GetDetailExam = Default + "/get-detail-exam";
+        public const string SubmitExam = Default + "/submit-exam";
         
         public const string PublicList = Default + "/public-list";
         public const string PublicCount = Default + "/public-count";
@@ -109,14 +111,14 @@ namespace Tracnghiem.Rpc.exam
             { "Thêm", new List<string> { 
                     Parent,
                     Master, Preview, Count, List, Get,
-                    Detail, Create, Send, UploadImage
+                    Detail, Create, Send, UploadImage, GetDetailExam, SubmitExam
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 
             { "Sửa", new List<string> { 
                     Parent,            
                     Master, Preview, Count, List, Get,
-                    Detail, Update, Send, UploadImage
+                    Detail, Update, Send, UploadImage, GetDetailExam, SubmitExam
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 

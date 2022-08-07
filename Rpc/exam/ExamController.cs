@@ -24,6 +24,7 @@ using Tracnghiem.Services.MStatus;
 using Tracnghiem.Services.MSubject;
 using Tracnghiem.Services.MQuestion;
 using Tracnghiem.Enums;
+using Tracnghiem.Services.MDoingExam;
 
 namespace Tracnghiem.Rpc.exam
 {
@@ -38,6 +39,7 @@ namespace Tracnghiem.Rpc.exam
         private ISubjectService SubjectService;
         private IQuestionService QuestionService;
         private IExamService ExamService;
+        private IDoingExamService DoingExamService;
         private ICurrentContext CurrentContext;
         public ExamController(
             IAppUserService AppUserService,
@@ -49,6 +51,7 @@ namespace Tracnghiem.Rpc.exam
             ISubjectService SubjectService,
             IQuestionService QuestionService,
             IExamService ExamService,
+            IDoingExamService DoingExamService,
             ICurrentContext CurrentContext
         )
         {
@@ -61,6 +64,7 @@ namespace Tracnghiem.Rpc.exam
             this.SubjectService = SubjectService;
             this.QuestionService = QuestionService;
             this.ExamService = ExamService;
+            this.DoingExamService = DoingExamService;
             this.CurrentContext = CurrentContext;
         }
 
@@ -141,6 +145,19 @@ namespace Tracnghiem.Rpc.exam
                 return Forbid();
 
             Exam Exam = await ExamService.Get(Exam_ExamDTO.Id);
+            return new Exam_ExamDTO(Exam);
+        }
+
+        [Route(ExamRoute.GetDetailExam), HttpPost]
+        public async Task<ActionResult<Exam_ExamDTO>> GetDetailExam([FromBody] Exam_ExamDTO Exam_ExamDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            if (!await HasPermission(Exam_ExamDTO.Id))
+                return Forbid();
+
+            Exam Exam = await DoingExamService.GetExam(Exam_ExamDTO.Id);
             return new Exam_ExamDTO(Exam);
         }
 
@@ -247,7 +264,24 @@ namespace Tracnghiem.Rpc.exam
                 return BadRequest(Exams.Where(x => !x.IsValidated));
             return true;
         }
-        
+
+        [Route(ExamRoute.SubmitExam), HttpPost]
+        public async Task<ActionResult<Exam_ExamHistoryDTO>> SubmitExam(Exam_ExamDTO Exam_ExamDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            if (!await HasPermission(Exam_ExamDTO.Id))
+                return Forbid();
+
+            Exam Exam = ConvertDTOToEntity(Exam_ExamDTO);
+            var ExamHistory = await DoingExamService.SubmitExam(Exam);
+            Exam_ExamHistoryDTO Exam_ExamHistoryDTO = new Exam_ExamHistoryDTO(ExamHistory);
+            if (ExamHistory.IsValidated)
+                return Exam_ExamHistoryDTO;
+            else
+                return BadRequest(Exam_ExamDTO);
+        }
         [Route(ExamRoute.Import), HttpPost]
         public async Task<ActionResult> Import(IFormFile file)
         {
@@ -579,6 +613,19 @@ namespace Tracnghiem.Rpc.exam
                         GradeId = x.Question.GradeId,
                     },
                 }).ToList();
+            var QuestionContentDTOs = Exam_ExamDTO.ExamQuestionMappings?.SelectMany(x => x.Question.QuestionContents).ToList();
+            var QuestionContents = QuestionContentDTOs.Select(x => new QuestionContent
+            {
+                Id = x.Id,
+                IsRight = x.IsRight,
+                QuestionId = x.QuestionId,
+                AnswerContent = x.AnswerContent
+            }).ToList(); 
+
+            foreach (ExamQuestionMapping ExamQuestionMapping in Exam.ExamQuestionMappings)
+            {
+                ExamQuestionMapping.Question.QuestionContents = QuestionContents.Where(x => x.QuestionId == ExamQuestionMapping.QuestionId).ToList();
+            }
             Exam.BaseLanguage = CurrentContext.Language;
             return Exam;
         }

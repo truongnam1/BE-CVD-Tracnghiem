@@ -22,6 +22,7 @@ namespace Tracnghiem.Rpc.exam
         public Guid RowId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public List<Exam_QuestionContentDTO> QuestionContents { get; set; }
         public Exam_QuestionDTO() {}
         public Exam_QuestionDTO(Question Question)
         {
@@ -36,6 +37,7 @@ namespace Tracnghiem.Rpc.exam
             this.CreatorId = Question.CreatorId;
             this.GradeId = Question.GradeId;
             this.RowId = Question.RowId;
+            this.QuestionContents = Question.QuestionContents?.Select(x => new Exam_QuestionContentDTO(x)).ToList();
             this.CreatedAt = Question.CreatedAt;
             this.UpdatedAt = Question.UpdatedAt;
             this.Informations = Question.Informations;
