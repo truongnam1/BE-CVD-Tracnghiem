@@ -486,6 +486,28 @@ namespace Tracnghiem.Repositories
                     },
                 }).ToListAsync();
 
+            var QuestionIds = Exam.ExamQuestionMappings.Select(x => x.QuestionId).Distinct().ToList();
+            ITempTableQuery<TempTable<long>> tempTableQuery = await DataContext.BulkInsertValuesIntoTempTableAsync<long>(QuestionIds);
+
+            var queryQC = from x in DataContext.QuestionContent
+                          join tt in tempTableQuery.Query on x.QuestionId equals tt.Column1
+                          select x;
+            List<QuestionContent> QuestionContents = await queryQC.
+                Select(x => new QuestionContent
+                {
+                    Id = x.Id,
+                    QuestionId = x.QuestionId,
+                    AnswerContent = x.AnswerContent,
+                    IsRight = x.IsRight
+                }).ToListAsync();
+            if (Exam.ExamQuestionMappings?.Any() ?? false)
+            {
+                foreach (var ExamQuestionMapping in Exam.ExamQuestionMappings)
+                {
+                    ExamQuestionMapping.Question.QuestionContents = QuestionContents
+                        .Where(x => x.QuestionId == ExamQuestionMapping.QuestionId).ToList();
+                }
+            }
             return Exam;
         }
         public async Task<bool> Create(Exam Exam)
