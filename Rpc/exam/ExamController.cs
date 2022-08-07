@@ -266,7 +266,7 @@ namespace Tracnghiem.Rpc.exam
         }
 
         [Route(ExamRoute.SubmitExam), HttpPost]
-        public async Task<ActionResult<Exam_ExamHistoryDTO>> SubmitExam(Exam_ExamDTO Exam_ExamDTO)
+        public async Task<ActionResult<Exam_ExamHistoryDTO>> SubmitExam([FromBody] Exam_ExamDTO Exam_ExamDTO)
         {
             if (!ModelState.IsValid)
                 throw new BindException(ModelState);
@@ -614,17 +614,21 @@ namespace Tracnghiem.Rpc.exam
                     },
                 }).ToList();
             var QuestionContentDTOs = Exam_ExamDTO.ExamQuestionMappings?.SelectMany(x => x.Question.QuestionContents).ToList();
-            var QuestionContents = QuestionContentDTOs.Select(x => new QuestionContent
+            if (QuestionContentDTOs != null)
             {
-                Id = x.Id,
-                IsRight = x.IsRight,
-                QuestionId = x.QuestionId,
-                AnswerContent = x.AnswerContent
-            }).ToList(); 
+                var QuestionContents = QuestionContentDTOs.Select(x => new QuestionContent
+                {
+                    Id = x.Id,
+                    IsRight = x.IsRight,
+                    QuestionId = x.QuestionId,
+                    AnswerContent = x.AnswerContent
+                }).ToList(); 
 
-            foreach (ExamQuestionMapping ExamQuestionMapping in Exam.ExamQuestionMappings)
-            {
-                ExamQuestionMapping.Question.QuestionContents = QuestionContents.Where(x => x.QuestionId == ExamQuestionMapping.QuestionId).ToList();
+                foreach (ExamQuestionMapping ExamQuestionMapping in Exam.ExamQuestionMappings)
+                {
+                    ExamQuestionMapping.Question.QuestionContents = QuestionContents.Where(x => x.QuestionId == ExamQuestionMapping.QuestionId).ToList();
+                }
+
             }
             Exam.BaseLanguage = CurrentContext.Language;
             return Exam;
