@@ -51,6 +51,8 @@ namespace Tracnghiem.Rpc.exam
             return Exam_AppUserDTOs;
         }
         [Route(ExamRoute.FilterListExamLevel), HttpPost]
+        
+        [AllowAnonymous]
         public async Task<List<Exam_ExamLevelDTO>> FilterListExamLevel([FromBody] Exam_ExamLevelFilterDTO Exam_ExamLevelFilterDTO)
         {
             if (!ModelState.IsValid)
@@ -88,6 +90,8 @@ namespace Tracnghiem.Rpc.exam
                 .Select(x => new Exam_ExamStatusDTO(x)).ToList();
             return Exam_ExamStatusDTOs;
         }
+
+        [AllowAnonymous]
         [Route(ExamRoute.FilterListGrade), HttpPost]
         public async Task<List<Exam_GradeDTO>> FilterListGrade([FromBody] Exam_GradeFilterDTO Exam_GradeFilterDTO)
         {
@@ -126,6 +130,8 @@ namespace Tracnghiem.Rpc.exam
                 .Select(x => new Exam_StatusDTO(x)).ToList();
             return Exam_StatusDTOs;
         }
+
+        [AllowAnonymous]
         [Route(ExamRoute.FilterListSubject), HttpPost]
         public async Task<List<Exam_SubjectDTO>> FilterListSubject([FromBody] Exam_SubjectFilterDTO Exam_SubjectFilterDTO)
         {
