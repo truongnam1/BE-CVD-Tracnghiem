@@ -102,6 +102,7 @@ namespace Tracnghiem.Services.MDoingExam
                     ExamedAt = StaticParams.DateTimeNow
                 };
                 await UOW.ExamHistoryRepository.Create(ExamHistory);
+                await BuildNumberTest(Exam.Id);
                 return ExamHistory;
             } 
             catch (Exception ex)
@@ -109,6 +110,22 @@ namespace Tracnghiem.Services.MDoingExam
                 Logging.CreateSystemLog(ex, nameof(DoingExamService));
             }
             return null;
+        }
+        private async Task BuildNumberTest(long ExamId)
+        {
+            Exam Exam = await UOW.ExamRepository.Get(ExamId);
+            DateTime Now = StaticParams.DateTimeNow;
+            ExamHistoryFilter ExamHistoryFilter = new ExamHistoryFilter();
+            ExamHistoryFilter.Skip = 0;
+            ExamHistoryFilter.Take = int.MaxValue;
+            ExamHistoryFilter.ExamId = new IdFilter { Equal = ExamId };
+            ExamHistoryFilter.Selects = ExamHistorySelect.ExamedAt;
+            List<ExamHistory> ExamHistories = await UOW.ExamHistoryRepository.List(ExamHistoryFilter);
+
+            Exam.CurrentMonthNumberTest = ExamHistories.Where(x => x.ExamedAt >= Now.AddMonths(-1)).Count();
+            Exam.TotalNumberTest = ExamHistories.Count();
+
+            await UOW.ExamRepository.Update(Exam);
         }
     }
 }
