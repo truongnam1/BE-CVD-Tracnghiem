@@ -276,13 +276,7 @@ namespace Tracnghiem.Services.MQuestion
                         Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionContents), QuestionMessage.Error.QuestionContent_NotCorectAnswers, QuestionMessage);
                     }
                 }
-                else if (QuestionTypeEnum.FillAnswer.Id == Question.QuestionTypeId)
-                {
-                    if (count == 0)
-                    {
-                        Question.AddError(nameof(QuestionValidator), nameof(Question.QuestionContents), QuestionMessage.Error.QuestionContent_NotCorectAnswers, QuestionMessage);
-                    }
-                }
+              
             }
             return true;
         }
