@@ -211,16 +211,9 @@ namespace Tracnghiem.Services.MQuestion
         }
         private async Task<bool> ValidateStatus(Question Question)
         {
-            if (Question.StatusId == 0)
+            if (!StatusEnum.StatusEnumList.Any(x => Question.StatusId == x.Id))
             {
-                Question.AddError(nameof(QuestionValidator), nameof(Question.Status), QuestionMessage.Error.StatusEmpty, QuestionMessage);
-            }
-            else
-            {
-                if (!StatusEnum.StatusEnumList.Any(x => Question.StatusId == x.Id))
-                {
-                    Question.AddError(nameof(QuestionValidator), nameof(Question.Status), QuestionMessage.Error.StatusNotExisted, QuestionMessage);
-                }
+                Question.AddError(nameof(QuestionValidator), nameof(Question.Status), QuestionMessage.Error.StatusNotExisted, QuestionMessage);
             }
             return true;
         }

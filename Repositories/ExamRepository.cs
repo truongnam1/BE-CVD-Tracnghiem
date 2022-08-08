@@ -60,6 +60,7 @@ namespace Tracnghiem.Repositories
                  query = query.Where(q => 
                     (filter.SearchBy.Contains(ExamSearch.Code) && q.Code.ToLower().Contains(filter.Search.ToLower())) ||
                     (filter.SearchBy.Contains(ExamSearch.Name) && q.Name.ToLower().Contains(filter.Search.ToLower())));
+
             }
 
             return query;

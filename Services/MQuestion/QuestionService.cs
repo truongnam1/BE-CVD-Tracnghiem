@@ -116,7 +116,7 @@ namespace Tracnghiem.Services.MQuestion
             try
             {
                 var oldData = await UOW.QuestionRepository.Get(Question.Id);
-
+                Question.CreatorId = oldData.CreatorId;
                 await UOW.QuestionRepository.Update(Question);
 
                 Question = await UOW.QuestionRepository.Get(Question.Id);
