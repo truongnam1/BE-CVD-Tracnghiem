@@ -42,7 +42,7 @@ namespace Tracnghiem.Services.MQuestion
         public async Task<bool> Create(Question Question)
         {
             //await ValidateCode(Question);
-            await ValidateName(Question);
+            //await ValidateName(Question);
             await ValidateContent(Question);
             await ValidateGrade(Question);
             await ValidateQuestionGroup(Question);
@@ -58,7 +58,7 @@ namespace Tracnghiem.Services.MQuestion
             if (await ValidateId(Question))
             {
                 //await ValidateCode(Question);
-                await ValidateName(Question);
+                //await ValidateName(Question);
                 await ValidateContent(Question);
                 await ValidateGrade(Question);
                 await ValidateQuestionGroup(Question);
