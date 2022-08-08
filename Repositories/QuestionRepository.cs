@@ -53,9 +53,16 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.SubjectId, filter.SubjectId);
             if (filter.Search != null)
             {
-                 query = query.Where(q => 
-                    (filter.SearchBy.Contains(QuestionSearch.Code) && q.Code.ToLower().Contains(filter.Search.ToLower())) ||
-                    (filter.SearchBy.Contains(QuestionSearch.Name) && q.Name.ToLower().Contains(filter.Search.ToLower())));
+                 //query = query.Where(q => 
+                 //   (filter.SearchBy.Contains(QuestionSearch.Code) && q.Code.ToLower().Contains(filter.Search.ToLower())) ||
+                 //   (filter.SearchBy.Contains(QuestionSearch.Name) && q.Name.ToLower().Contains(filter.Search.ToLower())) ||
+                 //   (filter.SearchBy.Contains(QuestionSearch.Content) && q.Content.ToLower().Contains(filter.Search.ToLower()))
+                 //   );
+
+                query = query.Where(q => q.Code.ToLower().Contains(filter.Search.ToLower()) ||
+                    q.Name.ToLower().Contains(filter.Search.ToLower()) ||
+                    q.Content.ToLower().Contains(filter.Search.ToLower())
+                );
             }
 
             return query;
