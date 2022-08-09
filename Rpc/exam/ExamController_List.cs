@@ -73,7 +73,7 @@ namespace Tracnghiem.Rpc.exam
             QuestionFilter.SearchBy = QuestionSearch.Code | QuestionSearch.Name;
             QuestionFilter.Search = Exam_QuestionFilterDTO.Search;
 
-            List<Question> Questions = await QuestionService.List(QuestionFilter);
+            List<Question> Questions = await QuestionService.ListDetail(QuestionFilter);
             List<Exam_QuestionDTO> Exam_QuestionDTOs = Questions
                 .Select(x => new Exam_QuestionDTO(x)).ToList();
             return Exam_QuestionDTOs;

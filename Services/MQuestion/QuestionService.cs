@@ -17,6 +17,7 @@ namespace Tracnghiem.Services.MQuestion
     {
         Task<int> Count(QuestionFilter QuestionFilter);
         Task<List<Question>> List(QuestionFilter QuestionFilter);
+        Task<List<Question>> ListDetail(QuestionFilter QuestionFilter);
         Task<Question> Get(long Id);
         Task<Question> Create(Question Question);
         Task<Question> Update(Question Question);
@@ -67,6 +68,21 @@ namespace Tracnghiem.Services.MQuestion
             try
             {
                 List<Question> Questions = await UOW.QuestionRepository.List(QuestionFilter);
+                return Questions;
+            }
+            catch (Exception ex)
+            {
+                Logging.CreateSystemLog(ex, nameof(QuestionService));
+            }
+            return null;
+        }
+
+        public async Task<List<Question>> ListDetail(QuestionFilter QuestionFilter)
+        {
+            try
+            {
+                List<Question> Questions = await UOW.QuestionRepository.ListDetail(QuestionFilter);
+
                 return Questions;
             }
             catch (Exception ex)

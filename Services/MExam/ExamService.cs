@@ -17,6 +17,7 @@ namespace Tracnghiem.Services.MExam
     {
         Task<int> Count(ExamFilter ExamFilter);
         Task<List<Exam>> List(ExamFilter ExamFilter);
+        Task<List<Exam>> ListDetail(ExamFilter ExamFilter);
         Task<Exam> Get(long Id);
         Task<Exam> PublicGet(long Id);
 
@@ -79,7 +80,24 @@ namespace Tracnghiem.Services.MExam
             }
             return null;
         }
-
+        public async Task<List<Exam>> ListDetail(ExamFilter ExamFilter)
+        {
+            try
+            {
+                List<Exam> Exams = await UOW.ExamRepository.List(ExamFilter);
+                if (Exams != null)
+                {
+                    List<long> QuestionIds = new List<long>();
+                    
+                }
+                return Exams;
+            }
+            catch (Exception ex)
+            {
+                Logging.CreateSystemLog(ex, nameof(ExamService));
+            }
+            return null;
+        }
         public async Task<Exam> Get(long Id)
         {
             Exam Exam = await UOW.ExamRepository.Get(Id);
