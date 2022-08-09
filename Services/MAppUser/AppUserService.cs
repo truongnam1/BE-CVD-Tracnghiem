@@ -235,7 +235,7 @@ namespace Tracnghiem.Services.MAppUser
                 var oldData = await UOW.AppUserRepository.Get(AppUser.Id);
                 oldData.DisplayName = AppUser.DisplayName;
                 oldData.ImageId = AppUser.ImageId;
-                await UOW.AppUserRepository.Update(AppUser);
+                await UOW.AppUserRepository.Update(oldData);
 
                 AppUser = await UOW.AppUserRepository.Get(AppUser.Id);
                 return AppUser;
