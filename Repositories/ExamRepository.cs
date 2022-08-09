@@ -42,7 +42,6 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => !q.DeletedAt.HasValue);
             query = query.Where(q => q.CreatedAt, filter.CreatedAt);
             query = query.Where(q => q.UpdatedAt, filter.UpdatedAt);
-            query = query.Where(q => q.Id, filter.Id);
             query = query.Where(q => q.Code, filter.Code);
             query = query.Where(q => q.Name, filter.Name);
             query = query.Where(q => q.TotalMark, filter.TotalMark);
@@ -57,17 +56,23 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.SubjectId, filter.SubjectId);
             if (filter.Search != null)
             {
-                 query = query.Where(q => 
-                    q.Code.ToLower().Contains(filter.Search.ToLower()) ||
-                    q.Name.ToLower().Contains(filter.Search.ToLower()) ||
-                //(filter.SearchBy.Contains(ExamSearch.Name) && q.Name.ToLower().Contains(filter.Search.ToLower())));
-                (filter.SearchBy.Contains(ExamSearch.Question) && q.Name.ToLower().Contains(filter.Search.ToLower()))
-                
-                
-                
+                query = query.Where(q =>
+                   q.Code.ToLower().Contains(filter.Search.ToLower()) ||
+                   q.Name.ToLower().Contains(filter.Search.ToLower())
                 );
+                if (filter.SearchBy.Contains(ExamSearch.Question))
+                {
+                    List<long> ExamIds = await DataContext.ExamQuestionMapping.AsNoTracking()
+                    .Where(q => q.Question.Content.ToLower().Contains(filter.Search.ToLower())).
+                    Select(x => x.ExamId)
+                    .ToListAsync();
+                    ExamIds = ExamIds.Distinct().ToList();
+                    filter.Id.In.AddRange(ExamIds);
+
+                }
 
             }
+            query = query.Where(q => q.Id, filter.Id);
 
             return query;
         }
@@ -651,6 +656,8 @@ namespace Tracnghiem.Repositories
             await DataContext.ExamQuestionMapping
                 .Where(x => x.ExamId == Exam.Id)
                 .DeleteFromQueryAsync();
+
+            List<ExamQuestionMappingDAO> ExamQuestionMappingDAOs = new List<ExamQuestionMappingDAO>();
             if (Exam.ExamQuestionMappings != null)
             {
                 foreach (ExamQuestionMapping ExamQuestionMapping in Exam.ExamQuestionMappings)
@@ -659,9 +666,9 @@ namespace Tracnghiem.Repositories
                     ExamQuestionMappingDAO.ExamId = Exam.Id;
                     ExamQuestionMappingDAO.QuestionId = ExamQuestionMapping.QuestionId;
                     ExamQuestionMappingDAO.Mark = ExamQuestionMapping.Mark;
-                    DataContext.ExamQuestionMapping.Add(ExamQuestionMappingDAO);
+                    ExamQuestionMappingDAOs.Add(ExamQuestionMappingDAO);
                 }
-                await DataContext.SaveChangesAsync();
+                await DataContext.ExamQuestionMapping.BulkInsertAsync(ExamQuestionMappingDAOs);
             }
         }
 
