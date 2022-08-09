@@ -299,8 +299,8 @@ namespace Tracnghiem.Services.MAppUser
         }
         public async Task<AppUser> ChangePassword(AppUser AppUser)
         {
-            //if (!await AppUserValidator.ChangePassword(AppUser))
-            //    return AppUser;
+            if (!await AppUserValidator.ChangePassword(AppUser))
+                return AppUser;
             try
             {
                 AppUser oldData = await UOW.AppUserRepository.Get(AppUser.Id);
@@ -310,14 +310,15 @@ namespace Tracnghiem.Services.MAppUser
 
                 var newData = await UOW.AppUserRepository.Get(AppUser.Id);
 
-                //Mail mail = new Mail
-                //{
-                //    Subject = "Change Password AppUser",
-                //    Body = $"Your password has been changed at {StaticParams.DateTimeNow.AddHours(7).ToString("HH:mm:ss dd-MM-yyyy")}",
-                //    Recipients = new List<string> { newData.Email },
-                //    RowId = Guid.NewGuid()
-                //};
-                //RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+                Mail mail = new Mail
+                {
+                    Subject = "Đổi mật khẩu tài khoản thành công",
+                    Body = $"Bạn đã đổi mật khẩu tài khoản thành công vào lúc {StaticParams.DateTimeNow.AddHours(7).ToString("HH:mm:ss dd-MM-yyyy")}.",
+                    RecipientDisplayName = AppUser.DisplayName,
+                    RecipientEmail = AppUser.Email,
+                    Id = Guid.NewGuid()
+                };
+                RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
                 return newData;
             }
             catch (Exception ex)

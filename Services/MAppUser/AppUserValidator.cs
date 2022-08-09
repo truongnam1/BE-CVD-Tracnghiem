@@ -374,9 +374,41 @@ namespace Tracnghiem.Services.MAppUser
             return true;
         }
 
-        public Task<bool> ChangePassword(AppUser AppUser)
+        public async Task<bool> ChangePassword(AppUser AppUser)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(AppUser.Password))
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.PasswordEmpty, AppUserMessage);
+            }
+            else if (AppUser.Password.Count() > 500)
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.PasswordOverLength, AppUserMessage);
+            }
+            else
+            {
+                AppUser appUser = await UOW.AppUserRepository.Get(CurrentContext.UserId);
+
+                bool verify = VerifyPassword(appUser.Password, AppUser.Password);
+                if (verify == false)
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.PasswordNotMatch);
+                    return false;
+                }
+            }
+
+            if (string.IsNullOrEmpty(AppUser.NewPassword))
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.NewPasswordEmpty, AppUserMessage);
+            }
+            else if (AppUser.NewPassword.Count() > 500)
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.NewPasswordOverLength, AppUserMessage);
+            }
+
+
+            
+
+            return AppUser.IsValidated;
         }
 
         public async Task<bool> ForgotPassword(AppUser AppUser)
