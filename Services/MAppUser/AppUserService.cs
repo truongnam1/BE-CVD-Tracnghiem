@@ -34,6 +34,7 @@ namespace Tracnghiem.Services.MAppUser
         Task<AppUser> Create(AppUser AppUser);
         Task<AppUser> UserCreate(AppUser AppUser);
         Task<AppUser> Update(AppUser AppUser);
+        Task<AppUser> UpdateLimit(AppUser AppUser);
         Task<AppUser> Delete(AppUser AppUser);
         Task<List<AppUser>> BulkDelete(List<AppUser> AppUsers);
         Task<List<AppUser>> BulkMerge(List<AppUser> AppUsers);
@@ -213,6 +214,27 @@ namespace Tracnghiem.Services.MAppUser
             {
                 var oldData = await UOW.AppUserRepository.Get(AppUser.Id);
 
+                await UOW.AppUserRepository.Update(AppUser);
+
+                AppUser = await UOW.AppUserRepository.Get(AppUser.Id);
+                return AppUser;
+            }
+            catch (Exception ex)
+            {
+                Logging.CreateSystemLog(ex, nameof(AppUserService));
+            }
+            return null;
+        }
+
+        public async Task<AppUser> UpdateLimit(AppUser AppUser)
+        {
+            if (!await AppUserValidator.UpdateLimit(AppUser))
+                return AppUser;
+            try
+            {
+                var oldData = await UOW.AppUserRepository.Get(AppUser.Id);
+                oldData.DisplayName = AppUser.DisplayName;
+                oldData.ImageId = AppUser.ImageId;
                 await UOW.AppUserRepository.Update(AppUser);
 
                 AppUser = await UOW.AppUserRepository.Get(AppUser.Id);

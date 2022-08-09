@@ -19,6 +19,8 @@ namespace Tracnghiem.Services.MAppUser
         Task Get(AppUser AppUser);
         Task<bool> Create(AppUser AppUser);
         Task<bool> Update(AppUser AppUser);
+        Task<bool> UpdateLimit(AppUser AppUser);
+
         Task<bool> Delete(AppUser AppUser);
         Task<bool> Login(AppUser AppUser);
         Task<bool> ChangePassword(AppUser AppUser);
@@ -68,6 +70,21 @@ namespace Tracnghiem.Services.MAppUser
                 await ValidateUsername(AppUser);
                 await ValidateDisplayName(AppUser);
                 await ValidatePassword(AppUser);
+                //await ValidateRefreshToken(AppUser);
+                await ValidateImage(AppUser);
+                //await ValidateRole(AppUser);
+                //await ValidateExamHistories(AppUser);
+            }
+            return AppUser.IsValidated;
+        }
+
+        public async Task<bool> UpdateLimit(AppUser AppUser)
+        {
+            if (await ValidateId(AppUser))
+            {
+                //await ValidateUsername(AppUser);
+                await ValidateDisplayName(AppUser);
+                //await ValidatePassword(AppUser);
                 //await ValidateRefreshToken(AppUser);
                 await ValidateImage(AppUser);
                 //await ValidateRole(AppUser);
