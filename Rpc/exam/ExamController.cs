@@ -111,6 +111,20 @@ namespace Tracnghiem.Rpc.exam
             return Exam_ExamDTOs;
         }
 
+        [Route(ExamRoute.ListExamSearchQuestion), HttpPost]
+        public async Task<ActionResult<List<Exam_ExamDTO>>> ListExamSearchQuestion([FromBody] Exam_ExamFilterDTO Exam_ExamFilterDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+
+            ExamFilter ExamFilter = ConvertFilterDTOToFilterEntity(Exam_ExamFilterDTO);
+            ExamFilter = await ExamService.ToFilter(ExamFilter);
+            List<Exam> Exams = await ExamService.List(ExamFilter);
+            List<Exam_ExamDTO> Exam_ExamDTOs = Exams
+                .Select(c => new Exam_ExamDTO(c)).ToList();
+            return Exam_ExamDTOs;
+        }
+
         [AllowAnonymous]
         [Route(ExamRoute.PublicCount), HttpPost]
         public async Task<ActionResult<int>> PublicCount([FromBody] Exam_ExamFilterDTO Exam_ExamFilterDTO)
@@ -465,6 +479,8 @@ namespace Tracnghiem.Rpc.exam
                 return new Exam_ImageDTO(Image);
 
         }
+
+        
         private async Task<bool> HasPermission(long Id)
         {
             ExamFilter ExamFilter = new ExamFilter();

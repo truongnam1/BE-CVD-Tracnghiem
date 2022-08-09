@@ -151,5 +151,6 @@ namespace Tracnghiem.Entities
         ALL = E.ALL,
         Code = E._1,
         Name = E._2,
+        Question = E._3,
     }
 }

@@ -34,6 +34,7 @@ namespace Tracnghiem.Rpc.exam
         private const string Default = Rpc + Module + "/exam";
         public const string Count = Default + "/count";
         public const string List = Default + "/list";
+        public const string ListExamSearchQuestion = Default + "/list-exam-search-question";
         public const string Get = Default + "/get";
         public const string PublicGet = Default + "/public-get";
 
@@ -104,20 +105,20 @@ namespace Tracnghiem.Rpc.exam
         {
             { "Tìm kiếm", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List,
+                    Master, Preview, Count, List, ListExamSearchQuestion,
                     Get,  
                 }.Concat(FilterList)
             },
             { "Thêm", new List<string> { 
                     Parent,
-                    Master, Preview, Count, List, Get,
+                    Master, Preview, Count, List, Get, ListExamSearchQuestion,
                     Detail, Create, Send, UploadImage, GetDetailExam, SubmitExam
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
 
             { "Sửa", new List<string> { 
                     Parent,            
-                    Master, Preview, Count, List, Get,
+                    Master, Preview, Count, List, Get, ListExamSearchQuestion,
                     Detail, Update, Send, UploadImage, GetDetailExam, SubmitExam
                 }.Concat(SingleList).Concat(FilterList).Concat(CountList)
             },
