@@ -36,6 +36,7 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.Id, filter.Id);
             query = query.Where(q => q.Code, filter.Code);
             query = query.Where(q => q.Name, filter.Name);
+     
 
             return query;
         }

@@ -12,13 +12,15 @@ namespace Tracnghiem.Entities
         public long Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
-        
+        public string Avatar { get; set; }
+
         public bool Equals(Subject other)
         {
             if (other == null) return false;
             if (this.Id != other.Id) return false;
             if (this.Code != other.Code) return false;
             if (this.Name != other.Name) return false;
+            if (this.Avatar != other.Avatar) return false;
             return true;
         }
         public override int GetHashCode()
@@ -36,6 +38,7 @@ namespace Tracnghiem.Entities
         public SubjectOrder OrderBy {get; set;}
         public SubjectSelect Selects {get; set;}
         public SubjectSearch SearchBy {get; set;}
+        public string Search { get; set;}
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
@@ -53,6 +56,7 @@ namespace Tracnghiem.Entities
         Id = E._0,
         Code = E._1,
         Name = E._2,
+        Avatar = E._3,
     }
 
     [Flags]

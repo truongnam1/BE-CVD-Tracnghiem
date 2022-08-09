@@ -170,6 +170,7 @@ namespace Tracnghiem.Rpc
                 Id = item.Id,
                 Code = item.Code,
                 Name = item.Name,
+                Avatar = item.Avatar,
             }).ToList();
             DataContext.Subject.BulkSynchronize(SubjectList);
         }

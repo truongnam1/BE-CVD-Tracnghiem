@@ -36,7 +36,12 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.Id, filter.Id);
             query = query.Where(q => q.Code, filter.Code);
             query = query.Where(q => q.Name, filter.Name);
-
+            if (filter.Search != null)
+            {
+                query = query.Where(q =>
+                   q.Code.ToLower().Contains(filter.Search.Trim().ToLower()) ||
+                   q.Name.ToLower().Contains(filter.Search.Trim().ToLower()));
+            }
             return query;
         }
 
@@ -100,6 +105,7 @@ namespace Tracnghiem.Repositories
                 Id = filter.Selects.Contains(SubjectSelect.Id) ? q.Id : default(long),
                 Code = filter.Selects.Contains(SubjectSelect.Code) ? q.Code : default(string),
                 Name = filter.Selects.Contains(SubjectSelect.Name) ? q.Name : default(string),
+                Avatar = filter.Selects.Contains(SubjectSelect.Avatar) ? q.Avatar : default(string),
             }).ToListAsync();
             return Subjects;
         }
@@ -142,6 +148,7 @@ namespace Tracnghiem.Repositories
                 Id = x.Id,
                 Code = x.Code,
                 Name = x.Name,
+                Avatar = x.Avatar,
             }).ToListAsync();
             
 

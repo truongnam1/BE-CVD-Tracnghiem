@@ -805,6 +805,11 @@ namespace Tracnghiem.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Avatar)
+                    .IsRequired()
+                    .HasMaxLength(500)
+                    .HasDefaultValueSql("(N'abc')");
+
                 entity.Property(e => e.Code)
                     .IsRequired()
                     .HasMaxLength(500);

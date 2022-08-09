@@ -14,6 +14,7 @@ namespace Tracnghiem.Models
         public long Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
+        public string Avatar { get; set; }
 
         public virtual ICollection<ExamDAO> Exams { get; set; }
         public virtual ICollection<QuestionDAO> Questions { get; set; }
