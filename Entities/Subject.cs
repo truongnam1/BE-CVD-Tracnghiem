@@ -13,6 +13,7 @@ namespace Tracnghiem.Entities
         public string Code { get; set; }
         public string Name { get; set; }
         public string Avatar { get; set; }
+        public long TotalExam { get; set; }
 
         public bool Equals(Subject other)
         {

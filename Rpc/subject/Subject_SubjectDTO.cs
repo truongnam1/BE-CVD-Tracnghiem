@@ -12,6 +12,7 @@ namespace Tracnghiem.Rpc.subject
         public long Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
+        public long TotalExam { get; set; }
         public string Avatar { get; set; }
         public Subject_SubjectDTO() {}
         public Subject_SubjectDTO(Subject Subject)
@@ -20,6 +21,7 @@ namespace Tracnghiem.Rpc.subject
             this.Code = Subject.Code;
             this.Name = Subject.Name;
             this.Avatar = Subject.Avatar;
+            this.TotalExam = Subject.TotalExam;
             this.Informations = Subject.Informations;
             this.Warnings = Subject.Warnings;
             this.Errors = Subject.Errors;
