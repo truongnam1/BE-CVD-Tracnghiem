@@ -119,7 +119,7 @@ namespace Tracnghiem.Rpc.exam
 
             ExamFilter ExamFilter = ConvertFilterDTOToFilterEntity(Exam_ExamFilterDTO);
             ExamFilter = await ExamService.ToFilter(ExamFilter);
-            List<Exam> Exams = await ExamService.List(ExamFilter);
+            List<Exam> Exams = await ExamService.ListExamSearchQuestion(ExamFilter);
             List<Exam_ExamDTO> Exam_ExamDTOs = Exams
                 .Select(c => new Exam_ExamDTO(c)).ToList();
             return Exam_ExamDTOs;

@@ -42,6 +42,7 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => !q.DeletedAt.HasValue);
             query = query.Where(q => q.CreatedAt, filter.CreatedAt);
             query = query.Where(q => q.UpdatedAt, filter.UpdatedAt);
+            query = query.Where(q => q.Id, filter.Id);
             query = query.Where(q => q.Code, filter.Code);
             query = query.Where(q => q.Name, filter.Name);
             query = query.Where(q => q.TotalMark, filter.TotalMark);
@@ -66,13 +67,17 @@ namespace Tracnghiem.Repositories
                     .Where(q => q.Question.Content.ToLower().Contains(filter.Search.ToLower())).
                     Select(x => x.ExamId)
                     .ToListAsync();
-                    ExamIds = ExamIds.Distinct().ToList();
-                    filter.Id.In.AddRange(ExamIds);
+                    if (ExamIds != null)
+                    {
+                        ExamIds = ExamIds.Distinct().ToList();
+                        IdFilter IdFilter = new IdFilter { In = ExamIds };
+                        query = query.Where(q => q.Id, IdFilter);
+
+                    }
 
                 }
 
             }
-            query = query.Where(q => q.Id, filter.Id);
 
             return query;
         }

@@ -103,6 +103,7 @@ namespace Tracnghiem.Services.MExam
         {
             try
             {
+                ExamFilter.SearchBy = ExamSearch.Question;
                 List<Exam> Exams = await UOW.ExamRepository.List(ExamFilter);
                 return Exams;
             }
