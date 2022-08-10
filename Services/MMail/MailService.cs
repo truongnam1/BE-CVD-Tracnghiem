@@ -26,7 +26,7 @@ namespace Tracnghiem.Services.MMail
 
         private async Task Send(Mail Mail)
         {
-            var from = new EmailAddress("namtao100@gmail.com", "Admin");
+            var from = new EmailAddress("truongnam01@protonmail.com", "Admin");
             var subject = Mail.Subject;
             var to = new EmailAddress(Mail.RecipientEmail, Mail.RecipientDisplayName);
             var plainTextContent = "";

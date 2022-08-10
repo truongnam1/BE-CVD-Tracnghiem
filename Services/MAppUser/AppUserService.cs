@@ -196,7 +196,7 @@ namespace Tracnghiem.Services.MAppUser
                     RecipientEmail = AppUser.Email,
                     Id = Guid.NewGuid()
                 };
-                //await MailService.SendEmails(new List<Mail> { mail });
+                await MailService.SendEmails(new List<Mail> { mail });
                 RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
                 return AppUser;
             }
@@ -382,8 +382,9 @@ namespace Tracnghiem.Services.MAppUser
                     RecipientEmail = newData.Email,
                     Id = Guid.NewGuid()
                 };
-                //await MailService.SendEmails(new List<Mail> { mail });
+                await MailService.SendEmails(new List<Mail> { mail });
                 RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+                //await MailService.SendEmails(Mails);
 
                 return newData;
             }
