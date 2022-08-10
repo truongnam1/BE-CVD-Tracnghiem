@@ -65,7 +65,7 @@ namespace Tracnghiem.Services.MDoingExam
                     Take = int.MaxValue,
                     Selects = ExamHistorySelect.ALL
                 });
-                long ExamingLatestTime = ExamHistories.Max(x => x.Times);
+                long ExamingLatestTime = ExamHistories.Count != 0? ExamHistories.Max(x => x.Times) : 0;
 
                 List<Question> Answers = Exam.ExamQuestionMappings.Select(x => x.Question).ToList();
                 //check dap an
@@ -73,12 +73,10 @@ namespace Tracnghiem.Services.MDoingExam
 
                 long totalQuestions = ExamDB.ExamQuestionMappings.Count();
                 long totalRightAnswers = 0;
-                decimal totalMark = 0;
                 foreach (Question Answer in Answers)
                 {
                     var ExamQuestionMapping = ExamDB.ExamQuestionMappings.FirstOrDefault(x => x.QuestionId == Answer.Id);
                     Question Question = ExamQuestionMapping.Question;
-                    decimal QuestionMark = ExamQuestionMapping.Mark.Value;
                     var StudentAnswers = Answer.QuestionContents.Where(x => x.IsRight).Select(x => x.Id).ToList();
                     var RightAnswers = Question.QuestionContents.Where(x => x.IsRight).Select(x => x.Id).ToList();
                     if (StudentAnswers.Count == RightAnswers.Count)
@@ -87,7 +85,6 @@ namespace Tracnghiem.Services.MDoingExam
                         if (Differences.Count == 0)
                         {
                             totalRightAnswers++;
-                            totalMark += QuestionMark;
                         }
                     }
                 }
@@ -98,7 +95,7 @@ namespace Tracnghiem.Services.MDoingExam
                     Times = ExamingLatestTime + 1,
                     CorrectAnswerQuantity = totalRightAnswers,
                     TotalQuestionQuantity = totalQuestions,
-                    Mark = totalMark,
+                    Mark = Math.Round((decimal)totalRightAnswers / totalQuestions * 10, 2),
                     ExamedAt = StaticParams.DateTimeNow
                 };
                 await UOW.ExamHistoryRepository.Create(ExamHistory);
