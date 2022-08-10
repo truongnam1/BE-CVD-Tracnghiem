@@ -29,6 +29,7 @@ namespace Tracnghiem.Rpc.app_user
         public const string GetForWeb = Default + "/profile-web/get";
         public const string Get = Default + "/profile/get";
         public const string Update = Default + "/profile/update";
+        public const string UpdateLimit = Default + "/profile/update-limit";
         public const string SaveImage = Default + "/profile/save-image";
         public const string ChangePassword = Default + "/profile/change-password";
         public const string RecoveryPasswordByOTP = Default + "/profile/recovery-password-by-otp";
@@ -42,7 +43,7 @@ namespace Tracnghiem.Rpc.app_user
         {
             { "Đăng nhập", new List<string> {
                     Logged,
-                    GetForWeb, Get, Update, SaveImage, SaveImage,
+                    GetForWeb, Get, Update, SaveImage, SaveImage, UpdateLimit
                 }
             },
             { "Đổi mật khẩu", new List<string> {

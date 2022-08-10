@@ -57,6 +57,22 @@ namespace Tracnghiem.Services.MSubject
             try
             {
                 List<Subject> Subjects = await UOW.SubjectRepository.List(SubjectFilter);
+
+                if (Subjects != null)
+                {
+                    List<long> Ids = Subjects.Select(x => x.Id).ToList();
+                    ExamFilter ExamFilter = new ExamFilter();
+                    ExamFilter.Take = int.MaxValue;
+                    ExamFilter.Skip = 0;
+                    ExamFilter.SubjectId = new IdFilter { In = Ids };
+                    ExamFilter.Selects = ExamSelect.Id | ExamSelect.Subject;
+                    List<Exam> Exams = await UOW.ExamRepository.List(ExamFilter);
+                    foreach (var Subject in Subjects)
+                    {
+                        Subject.TotalExam = Exams.Where(x => x.SubjectId == Subject.Id).Count();
+                    }
+
+                }
                 return Subjects;
             }
             catch (Exception ex)

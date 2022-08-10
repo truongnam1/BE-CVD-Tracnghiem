@@ -57,9 +57,25 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.SubjectId, filter.SubjectId);
             if (filter.Search != null)
             {
-                 query = query.Where(q => 
-                    (filter.SearchBy.Contains(ExamSearch.Code) && q.Code.ToLower().Contains(filter.Search.ToLower())) ||
-                    (filter.SearchBy.Contains(ExamSearch.Name) && q.Name.ToLower().Contains(filter.Search.ToLower())));
+                query = query.Where(q =>
+                   q.Code.ToLower().Contains(filter.Search.ToLower()) ||
+                   q.Name.ToLower().Contains(filter.Search.ToLower())
+                );
+                if (filter.SearchBy.Contains(ExamSearch.Question))
+                {
+                    List<long> ExamIds = await DataContext.ExamQuestionMapping.AsNoTracking()
+                    .Where(q => q.Question.Content.ToLower().Contains(filter.Search.ToLower())).
+                    Select(x => x.ExamId)
+                    .ToListAsync();
+                    if (ExamIds != null)
+                    {
+                        ExamIds = ExamIds.Distinct().ToList();
+                        IdFilter IdFilter = new IdFilter { In = ExamIds };
+                        query = query.Where(q => q.Id, IdFilter);
+
+                    }
+
+                }
 
             }
 
@@ -645,6 +661,8 @@ namespace Tracnghiem.Repositories
             await DataContext.ExamQuestionMapping
                 .Where(x => x.ExamId == Exam.Id)
                 .DeleteFromQueryAsync();
+
+            List<ExamQuestionMappingDAO> ExamQuestionMappingDAOs = new List<ExamQuestionMappingDAO>();
             if (Exam.ExamQuestionMappings != null)
             {
                 foreach (ExamQuestionMapping ExamQuestionMapping in Exam.ExamQuestionMappings)
@@ -653,9 +671,9 @@ namespace Tracnghiem.Repositories
                     ExamQuestionMappingDAO.ExamId = Exam.Id;
                     ExamQuestionMappingDAO.QuestionId = ExamQuestionMapping.QuestionId;
                     ExamQuestionMappingDAO.Mark = ExamQuestionMapping.Mark;
-                    DataContext.ExamQuestionMapping.Add(ExamQuestionMappingDAO);
+                    ExamQuestionMappingDAOs.Add(ExamQuestionMappingDAO);
                 }
-                await DataContext.SaveChangesAsync();
+                await DataContext.ExamQuestionMapping.BulkInsertAsync(ExamQuestionMappingDAOs);
             }
         }
 

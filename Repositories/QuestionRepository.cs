@@ -19,6 +19,7 @@ namespace Tracnghiem.Repositories
         Task<int> CountAll(QuestionFilter QuestionFilter);
         Task<int> Count(QuestionFilter QuestionFilter);
         Task<List<Question>> List(QuestionFilter QuestionFilter);
+        Task<List<Question>> ListDetail(QuestionFilter filter);
         Task<List<Question>> List(List<long> Ids);
         Task<Question> Get(long Id);
         Task<bool> Create(Question Question);
@@ -244,6 +245,43 @@ namespace Tracnghiem.Repositories
             QuestionDAOs = await OrFilter(QuestionDAOs, filter);
             QuestionDAOs = DynamicOrder(QuestionDAOs, filter);
             List<Question> Questions = await DynamicSelect(QuestionDAOs, filter);
+
+            return Questions;
+        }
+
+        public async Task<List<Question>> ListDetail(QuestionFilter filter)
+        {
+            if (filter == null) return new List<Question>();
+            IQueryable<QuestionDAO> QuestionDAOs = DataContext.Question.AsNoTracking();
+            QuestionDAOs = await DynamicFilter(QuestionDAOs, filter);
+            QuestionDAOs = await OrFilter(QuestionDAOs, filter);
+            QuestionDAOs = DynamicOrder(QuestionDAOs, filter);
+            List<Question> Questions = await DynamicSelect(QuestionDAOs, filter);
+
+            if (Questions != null)
+            {
+                List<long> Ids = Questions.Select(x => x.Id).ToList();
+                IdFilter IdFilter = new IdFilter { In = Ids };
+
+                var QuestionContentQuery = DataContext.QuestionContent.AsNoTracking()
+                   .Where(x => x.QuestionId, IdFilter);
+                List<QuestionContent> QuestionContents = await QuestionContentQuery
+                    .Select(x => new QuestionContent
+                    {
+                        Id = x.Id,
+                        QuestionId = x.QuestionId,
+                        AnswerContent = x.AnswerContent,
+                        IsRight = x.IsRight,
+                    }).ToListAsync();
+
+                foreach (Question Question in Questions)
+                {
+                    Question.QuestionContents = QuestionContents
+                        .Where(x => x.QuestionId == Question.Id)
+                        .ToList();
+                }
+
+            }
             return Questions;
         }
 

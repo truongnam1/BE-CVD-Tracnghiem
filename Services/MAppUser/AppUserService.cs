@@ -34,6 +34,7 @@ namespace Tracnghiem.Services.MAppUser
         Task<AppUser> Create(AppUser AppUser);
         Task<AppUser> UserCreate(AppUser AppUser);
         Task<AppUser> Update(AppUser AppUser);
+        Task<AppUser> UpdateLimit(AppUser AppUser);
         Task<AppUser> Delete(AppUser AppUser);
         Task<List<AppUser>> BulkDelete(List<AppUser> AppUsers);
         Task<List<AppUser>> BulkMerge(List<AppUser> AppUsers);
@@ -195,7 +196,7 @@ namespace Tracnghiem.Services.MAppUser
                     RecipientEmail = AppUser.Email,
                     Id = Guid.NewGuid()
                 };
-                //await MailService.SendEmails(new List<Mail> { mail });
+                await MailService.SendEmails(new List<Mail> { mail });
                 RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
                 return AppUser;
             }
@@ -214,6 +215,27 @@ namespace Tracnghiem.Services.MAppUser
                 var oldData = await UOW.AppUserRepository.Get(AppUser.Id);
 
                 await UOW.AppUserRepository.Update(AppUser);
+
+                AppUser = await UOW.AppUserRepository.Get(AppUser.Id);
+                return AppUser;
+            }
+            catch (Exception ex)
+            {
+                Logging.CreateSystemLog(ex, nameof(AppUserService));
+            }
+            return null;
+        }
+
+        public async Task<AppUser> UpdateLimit(AppUser AppUser)
+        {
+            if (!await AppUserValidator.UpdateLimit(AppUser))
+                return AppUser;
+            try
+            {
+                var oldData = await UOW.AppUserRepository.Get(AppUser.Id);
+                oldData.DisplayName = AppUser.DisplayName;
+                oldData.ImageId = AppUser.ImageId;
+                await UOW.AppUserRepository.Update(oldData);
 
                 AppUser = await UOW.AppUserRepository.Get(AppUser.Id);
                 return AppUser;
@@ -299,8 +321,8 @@ namespace Tracnghiem.Services.MAppUser
         }
         public async Task<AppUser> ChangePassword(AppUser AppUser)
         {
-            //if (!await AppUserValidator.ChangePassword(AppUser))
-            //    return AppUser;
+            if (!await AppUserValidator.ChangePassword(AppUser))
+                return AppUser;
             try
             {
                 AppUser oldData = await UOW.AppUserRepository.Get(AppUser.Id);
@@ -310,14 +332,15 @@ namespace Tracnghiem.Services.MAppUser
 
                 var newData = await UOW.AppUserRepository.Get(AppUser.Id);
 
-                //Mail mail = new Mail
-                //{
-                //    Subject = "Change Password AppUser",
-                //    Body = $"Your password has been changed at {StaticParams.DateTimeNow.AddHours(7).ToString("HH:mm:ss dd-MM-yyyy")}",
-                //    Recipients = new List<string> { newData.Email },
-                //    RowId = Guid.NewGuid()
-                //};
-                //RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+                Mail mail = new Mail
+                {
+                    Subject = "Đổi mật khẩu tài khoản thành công",
+                    Body = $"Bạn đã đổi mật khẩu tài khoản thành công vào lúc {StaticParams.DateTimeNow.AddHours(7).ToString("HH:mm:ss dd-MM-yyyy")}.",
+                    RecipientDisplayName = AppUser.DisplayName,
+                    RecipientEmail = AppUser.Email,
+                    Id = Guid.NewGuid()
+                };
+                RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
                 return newData;
             }
             catch (Exception ex)
@@ -359,8 +382,9 @@ namespace Tracnghiem.Services.MAppUser
                     RecipientEmail = newData.Email,
                     Id = Guid.NewGuid()
                 };
-                //await MailService.SendEmails(new List<Mail> { mail });
+                await MailService.SendEmails(new List<Mail> { mail });
                 RabbitManager.PublishSingle(mail, RoutingKeyEnum.MailSend.Code);
+                //await MailService.SendEmails(Mails);
 
                 return newData;
             }

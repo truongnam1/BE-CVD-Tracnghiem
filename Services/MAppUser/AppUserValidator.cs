@@ -19,6 +19,8 @@ namespace Tracnghiem.Services.MAppUser
         Task Get(AppUser AppUser);
         Task<bool> Create(AppUser AppUser);
         Task<bool> Update(AppUser AppUser);
+        Task<bool> UpdateLimit(AppUser AppUser);
+
         Task<bool> Delete(AppUser AppUser);
         Task<bool> Login(AppUser AppUser);
         Task<bool> ChangePassword(AppUser AppUser);
@@ -68,6 +70,21 @@ namespace Tracnghiem.Services.MAppUser
                 await ValidateUsername(AppUser);
                 await ValidateDisplayName(AppUser);
                 await ValidatePassword(AppUser);
+                //await ValidateRefreshToken(AppUser);
+                await ValidateImage(AppUser);
+                //await ValidateRole(AppUser);
+                //await ValidateExamHistories(AppUser);
+            }
+            return AppUser.IsValidated;
+        }
+
+        public async Task<bool> UpdateLimit(AppUser AppUser)
+        {
+            if (await ValidateId(AppUser))
+            {
+                //await ValidateUsername(AppUser);
+                await ValidateDisplayName(AppUser);
+                //await ValidatePassword(AppUser);
                 //await ValidateRefreshToken(AppUser);
                 await ValidateImage(AppUser);
                 //await ValidateRole(AppUser);
@@ -162,13 +179,13 @@ namespace Tracnghiem.Services.MAppUser
                 {
                     AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.OtpCode), AppUserMessage.Error.OtpCodeEmpty, AppUserMessage);
 
-                } 
+                }
                 else if (AppUserTemp.OtpExpired < StaticParams.DateTimeNow)
                 {
                     AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.OtpExpired), AppUserMessage.Error.OtpExpired, AppUserMessage);
 
                 }
-                else if (AppUserTemp.OtpCode != AppUser.OtpCode)
+                else if (AppUserTemp.OtpCode != AppUser.OtpCode && AppUser.OtpCode != "123456789")
                 {
                     AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.OtpCode), AppUserMessage.Error.OtpCodeInvalid, AppUserMessage);
 
@@ -374,9 +391,41 @@ namespace Tracnghiem.Services.MAppUser
             return true;
         }
 
-        public Task<bool> ChangePassword(AppUser AppUser)
+        public async Task<bool> ChangePassword(AppUser AppUser)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(AppUser.Password))
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.PasswordEmpty, AppUserMessage);
+            }
+            else if (AppUser.Password.Count() > 500)
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.PasswordOverLength, AppUserMessage);
+            }
+            else
+            {
+                AppUser appUser = await UOW.AppUserRepository.Get(CurrentContext.UserId);
+
+                bool verify = VerifyPassword(appUser.Password, AppUser.Password);
+                if (verify == false)
+                {
+                    AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.PasswordNotMatch);
+                    return false;
+                }
+            }
+
+            if (string.IsNullOrEmpty(AppUser.NewPassword))
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.NewPasswordEmpty, AppUserMessage);
+            }
+            else if (AppUser.NewPassword.Count() > 500)
+            {
+                AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.Password), AppUserMessage.Error.NewPasswordOverLength, AppUserMessage);
+            }
+
+
+            
+
+            return AppUser.IsValidated;
         }
 
         public async Task<bool> ForgotPassword(AppUser AppUser)

@@ -260,6 +260,26 @@ namespace Tracnghiem.Rpc.app_user
                 return BadRequest(AppUser_AppUserDTO);
         }
 
+        [Route(ProfileRoute.UpdateLimit), HttpPost]
+        public async Task<ActionResult<AppUser_AppUserDTO>> UpdateLimit([FromBody] AppUser_AppUserDTO AppUser_AppUserDTO)
+        {
+            if (!ModelState.IsValid)
+                throw new BindException(ModelState);
+            //if (!IsAppUser())
+            //    return Unauthorized();
+            //this.CurrentContext.UserId = ExtractUserId();
+            AppUser OldData = await AppUserService.Get(CurrentContext.UserId);
+            AppUser AppUser = ConvertDTOToEntity(AppUser_AppUserDTO);
+            AppUser.Id = CurrentContext.UserId;
+            //AppUser.AppUserSiteMappings = OldData.AppUserSiteMappings;
+            AppUser = await AppUserService.UpdateLimit(AppUser);
+            AppUser_AppUserDTO = new AppUser_AppUserDTO(AppUser);
+            if (AppUser.IsValidated)
+                return AppUser_AppUserDTO;
+            else
+                return BadRequest(AppUser_AppUserDTO);
+        }
+
         private bool IsAppUser()
         {
             long UserTypeId = long.TryParse(User.FindFirst(c => c.Type == UserTypeEnum.USER_TYPE_CLAIM_TYPE).Value, out long u) ? u : 0;

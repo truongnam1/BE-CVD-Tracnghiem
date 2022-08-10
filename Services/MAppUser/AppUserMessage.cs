@@ -31,6 +31,8 @@ namespace Tracnghiem.Services.MAppUser
             DisplayNameOverLength,
             PasswordEmpty,
             PasswordOverLength,
+            NewPasswordEmpty,
+            NewPasswordOverLength,
             RefreshTokenEmpty,
             RefreshTokenOverLength,
             ImageNotExisted,

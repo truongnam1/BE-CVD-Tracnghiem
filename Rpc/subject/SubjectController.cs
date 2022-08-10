@@ -28,7 +28,7 @@ using Tracnghiem.Services.MDoingExam;
 
 namespace Tracnghiem.Rpc.subject
 {
-    public partial class PublicExamController : RpcController
+    public class SubjectController : RpcController
     {
         private IAppUserService AppUserService;
         private IExamLevelService ExamLevelService;
@@ -41,7 +41,7 @@ namespace Tracnghiem.Rpc.subject
         private IExamService ExamService;
         private IDoingExamService DoingExamService;
         private ICurrentContext CurrentContext;
-        public PublicExamController(
+        public SubjectController(
             IAppUserService AppUserService,
             IExamLevelService ExamLevelService,
             IExamStatusService ExamStatusService,
