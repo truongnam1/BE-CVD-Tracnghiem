@@ -250,10 +250,6 @@ namespace Tracnghiem.Models
 
             modelBuilder.Entity<ExamHistoryDAO>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.AppUserId).ValueGeneratedOnAdd();
-
                 entity.Property(e => e.ExamedAt).HasColumnType("datetime");
 
                 entity.Property(e => e.Mark).HasColumnType("decimal(20, 6)");
