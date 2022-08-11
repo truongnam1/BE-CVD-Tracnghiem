@@ -57,24 +57,37 @@ namespace Tracnghiem.Repositories
             query = query.Where(q => q.SubjectId, filter.SubjectId);
             if (filter.Search != null)
             {
-                query = query.Where(q =>
-                   q.Code.ToLower().Contains(filter.Search.ToLower()) ||
-                   q.Name.ToLower().Contains(filter.Search.ToLower())
-                );
+                List<long> ExamIds = new List<long>();
                 if (filter.SearchBy.Contains(ExamSearch.Question))
                 {
-                    List<long> ExamIds = await DataContext.ExamQuestionMapping.AsNoTracking()
+                    ExamIds = await DataContext.ExamQuestionMapping.AsNoTracking()
                     .Where(q => q.Question.Content.ToLower().Contains(filter.Search.ToLower())).
                     Select(x => x.ExamId)
                     .ToListAsync();
-                    if (ExamIds != null)
-                    {
-                        ExamIds = ExamIds.Distinct().ToList();
-                        IdFilter IdFilter = new IdFilter { In = ExamIds };
-                        query = query.Where(q => q.Id, IdFilter);
 
-                    }
+                    //if (ExamIds != null)
+                    //{
+                    //    ExamIds = ExamIds.Distinct().ToList();
+                    //    IdFilter IdFilter = new IdFilter { In = ExamIds };
+                    //    query = query.Where(q => q.Id, IdFilter);       
+                    //}
 
+                }
+               
+                if (ExamIds.Count() > 0)
+                {
+                     query = query.Where(q =>
+                     q.Code.ToLower().Contains(filter.Search.ToLower()) ||
+                     q.Name.ToLower().Contains(filter.Search.ToLower()) ||
+                     ExamIds.Contains(q.Id)
+                    );
+                }
+                else
+                {
+                  query = query.Where(q =>
+                  q.Code.ToLower().Contains(filter.Search.ToLower()) ||
+                  q.Name.ToLower().Contains(filter.Search.ToLower())
+               );
                 }
 
             }
