@@ -188,7 +188,6 @@ namespace Tracnghiem.Services.MAppUser
                 else if (AppUserTemp.OtpCode != AppUser.OtpCode && AppUser.OtpCode != "123456789")
                 {
                     AppUser.AddError(nameof(AppUserValidator), nameof(AppUser.OtpCode), AppUserMessage.Error.OtpCodeInvalid, AppUserMessage);
-
                 }
             }
             return AppUser.IsValidated;
